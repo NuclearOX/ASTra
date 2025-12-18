@@ -127,25 +127,7 @@ python Halstead_analyzer.py examples/
 
 ## Output Structure
 
-The tool generates organized output in the `output/` directory:
-
-```
-output/
-├── c/
-│   ├── charts/
-│   │   ├── example_chart.png
-│   │   └── simple_chart.png
-│   └── reports/
-│       ├── example_report.html
-│       └── simple_report.html
-└── java/
-    ├── charts/
-    │   ├── example_chart.png
-    │   └── simple_chart.png
-    └── reports/
-        ├── example_report.html
-        └── simple_report.html
-```
+The tool generates organized output in the `output/` directory.
 
 ### Report Contents
 
@@ -159,14 +141,6 @@ Each HTML report includes:
 ## Example Files
 
 The `examples/` directory contains sample files for testing:
-
-### C Examples
-- `example.c`: Complex calculator program with multiple functions
-- `simple.c`: Basic arithmetic operations
-
-### Java Examples
-- `example.java`: Student management system with classes and methods
-- `simple.java`: Simple calculator class
 
 ## How It Works
 
@@ -315,10 +289,6 @@ This project demonstrates:
 
 This project is developed for academic purposes as part of the Master's Degree in Computer Engineering curriculum.
 
-## Author
-
-Developed for the "Programming Paradigms and Languages" course.
-
 ---
 
 ## Quick Start Guide
@@ -340,6 +310,3 @@ Developed for the "Programming Paradigms and Languages" course.
 5. **Open reports in your browser** to see visualizations and metrics
 
 ---
-
-For questions or issues, please refer to the course materials or contact the instructor.
-

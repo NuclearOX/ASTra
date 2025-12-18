@@ -84,8 +84,8 @@ def main():
                 # Try to open report in browser
                 try:
                     webbrowser.open(report_path)
-                except:
-                    pass
+                except Exception:
+                    pass  # Browser opening is optional, fail silently
         elif os.path.isdir(target):
             print(f"\n{C.BLUE}Analyzing directory: {target}{C.END}")
             results = process_directory(target, output_base_dir)
@@ -96,8 +96,8 @@ def main():
                 # Try to open the first report
                 try:
                     webbrowser.open(results[0][1])
-                except:
-                    pass
+                except Exception:
+                    pass  # Browser opening is optional, fail silently
         else:
             print(f"{C.FAIL}Error: '{target}' is neither a file nor a directory.{C.END}")
             sys.exit(1)

@@ -1,0 +1,89 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Report: simple.java</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; color: #333; padding: 20px; margin: 0; }
+                .container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+                h1 { border-bottom: 3px solid #007bff; padding-bottom: 10px; color: #2c3e50; margin-top: 0; }
+                .meta { color: #7f8c8d; margin-bottom: 30px; font-size: 0.95em; }
+                .lang-badge { display: inline-block; background: #007bff; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px; }
+                
+                .score-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 8px; text-align: center; margin-bottom: 30px; border: 2px solid #dee2e6; }
+                .score-val { font-size: 3.5em; font-weight: bold; margin: 10px 0; }
+                .good { color: #27ae60; } .warn { color: #f39c12; } .bad { color: #c0392b; }
+                
+                .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+                .card { background: #fff; border: 1px solid #e1e4e8; padding: 15px; border-radius: 6px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+                .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+                .card h3 { margin: 0; font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+                .card .val { font-size: 1.5em; font-weight: 600; color: #34495e; margin-top: 5px; }
+                
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #eee; }
+                th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+                th { background-color: #f1f2f6; color: #555; font-weight: 600; }
+                tr:hover { background-color: #f8f9fa; }
+                
+                .chart-container { margin-top: 30px; text-align: center; }
+                .chart-container h2 { color: #2c3e50; margin-bottom: 20px; }
+                .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #aaa; padding-top: 20px; border-top: 1px solid #eee; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Static Analysis Report <span class="lang-badge">JAVA</span></h1>
+                <div class="meta">
+                    <strong>File:</strong> simple.java<br>
+                    <strong>Path:</strong> examples\simple.java<br>
+                    <strong>Date:</strong> 2025-12-19 00:09:49
+                </div>
+                
+                <div class="score-box">
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">MAINTAINABILITY INDEX (MI)</div>
+                    <div class="score-val bad">47.1</div>
+                    <small style="color: #999;">0 (Critical) - 100 (Excellent)</small>
+                </div>
+                
+                
+            <div class="chart-container">
+                <h2>Visual Analysis</h2>
+                <img src="simple_chart.png" alt="Metrics Chart" style="max-width:100%; border-radius:8px; border:1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            </div>
+            
+
+                <h2>Halstead Overview</h2>
+                <div class="grid">
+                    <div class="card"><h3>Program Level (L)</h3><div class="val">0.0320</div></div>
+                    <div class="card"><h3>Volume (V)</h3><div class="val">1016</div></div>
+                    <div class="card"><h3>Difficulty (D)</h3><div class="val">31.25</div></div>
+                    <div class="card"><h3>Effort (E)</h3><div class="val">31758</div></div>
+                </div>
+
+                <h2>Detailed Metrics Table</h2>
+                <table>
+                    <thead><tr><th>Metric</th><th>Value</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Operators (n1)</strong></td><td>25</td><td>Unique operators count</td></tr>
+                        <tr><td><strong>Operands (n2)</strong></td><td>24</td><td>Unique operands count</td></tr>
+                        <tr><td><strong>Total Operators (N1)</strong></td><td>121</td><td>Total operator occurrences</td></tr>
+                        <tr><td><strong>Total Operands (N2)</strong></td><td>60</td><td>Total operand occurrences</td></tr>
+                        <tr><td><strong>Program Length (N)</strong></td><td>181</td><td>Total tokens (N1 + N2)</td></tr>
+                        <tr><td><strong>Vocabulary (n)</strong></td><td>49</td><td>Total unique tokens (n1 + n2)</td></tr>
+                        <tr><td><strong>Volume (V)</strong></td><td>1016.26</td><td>Program size in bits</td></tr>
+                        <tr><td><strong>Difficulty (D)</strong></td><td>31.25</td><td>Implementation difficulty</td></tr>
+                        <tr><td><strong>Effort (E)</strong></td><td>31758.20</td><td>Mental effort required</td></tr>
+                        <tr><td><strong>Time (T)</strong></td><td>1764.34 s</td><td>Estimated coding time</td></tr>
+                        <tr><td><strong>Program Level (L)</strong></td><td>0.0320</td><td>Program abstraction level</td></tr>
+                        <tr><td><strong>Est. Bugs (B)</strong></td><td>0.34</td><td>Potential defects</td></tr>
+                        <tr><td><strong>Cyclomatic Complexity</strong></td><td>2</td><td>Independent paths count</td></tr>
+                        <tr><td><strong>Logical LOC</strong></td><td>28</td><td>Lines of code (non-empty)</td></tr>
+                    </tbody>
+                </table>
+                
+                <div class="footer">Generated by Module Complexity Analyzer | Halstead Metrics Analysis</div>
+            </div>
+        </body>
+        </html>
+        

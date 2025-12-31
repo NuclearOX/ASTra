@@ -1,0 +1,25 @@
+# ANTLR4 Generation Commands for ASTra
+# Execute these commands to generate Python files from the grammar files
+
+# Step 1: Generate Python files from Java20Lexer.g4 and Java20Parser.g4
+# Note: Make sure antlr4 is installed: pip install antlr4-tools
+# Or use: java -jar antlr-4.13.1-complete.jar (if using Java version)
+
+# Using antlr4-tools (recommended for Python):
+antlr4 -Dlanguage=Python3 -visitor -no-listener grammar/Java20Lexer.g4
+antlr4 -Dlanguage=Python3 -visitor -no-listener grammar/Java20Parser.g4
+
+# Alternative: Using Java ANTLR jar (if antlr4-tools not available):
+# java -jar antlr-4.13.1-complete.jar -Dlanguage=Python3 -visitor -no-listener grammar/Java20Lexer.g4
+# java -jar antlr-4.13.1-complete.jar -Dlanguage=Python3 -visitor -no-listener grammar/Java20Parser.g4
+
+# The generated files will be:
+# - Java20Lexer.py
+# - Java20Parser.py
+# - Java20Lexer.tokens
+# - Java20Parser.tokens
+# - Java20ParserVisitor.py (base visitor class)
+
+# Note: After generation, these files should be placed in the 'grammar' directory
+# or in a location accessible by the Python import system.
+

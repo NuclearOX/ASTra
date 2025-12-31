@@ -1,18 +1,35 @@
-# Halstead Metrics Analyzer - Project Report
+# ASTra - Java Static Analysis Tool
+## Comprehensive Project Report
+
+---
 
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Introduction to Halstead Metrics](#introduction-to-halstead-metrics)
+1. [Executive Summary](#executive-summary)
+2. [Project Overview](#project-overview)
 3. [System Architecture](#system-architecture)
-4. [Implementation Details](#implementation-details)
-5. [Features and Capabilities](#features-and-capabilities)
-6. [Usage Guide](#usage-guide)
-7. [Output Structure](#output-structure)
-8. [Example Analysis](#example-analysis)
-9. [Technical Specifications](#technical-specifications)
-10. [Limitations and Future Work](#limitations-and-future-work)
-11. [Conclusion](#conclusion)
+4. [Technical Implementation](#technical-implementation)
+5. [Metrics Calculation](#metrics-calculation)
+6. [Visualization & Reporting](#visualization--reporting)
+7. [Project Structure](#project-structure)
+8. [Installation & Setup](#installation--setup)
+9. [Usage Guide](#usage-guide)
+10. [Design Decisions](#design-decisions)
+11. [Testing & Validation](#testing--validation)
+12. [Future Enhancements](#future-enhancements)
+13. [References](#references)
+
+---
+
+## Executive Summary
+
+**ASTra** (Java Automated Static Analysis) is a comprehensive static analysis tool designed to analyze Java source code by generating and traversing Abstract Syntax Trees (ASTs) using ANTLR4. The tool calculates rigorous software metrics including Halstead Complexity Metrics, Cyclomatic Complexity, Maintainability Index, and CK (Chidamber & Kemerer) Object-Oriented Design Metrics.
+
+The project implements a **two-pass analysis approach**:
+- **Pass 1**: Builds a global inheritance graph for accurate CK metrics calculation
+- **Pass 2**: Performs detailed AST traversal to calculate all metrics per method and class
+
+The tool generates professional HTML5 dashboards with embedded visualizations, providing developers with actionable insights into code quality and maintainability.
 
 ---
 
@@ -20,633 +37,692 @@
 
 ### Purpose
 
-The **Halstead Metrics Analyzer** is a static code analysis tool developed for the "Programming Paradigms and Languages" course in the Master's Degree in Computer Engineering. The tool implements Halstead Complexity Metrics to quantitatively assess code complexity, maintainability, and quality for C and Java programming languages.
+ASTra was developed to provide:
+- **Comprehensive Metrics Analysis**: All 12 Halstead metrics, Cyclomatic Complexity, Maintainability Index, and CK metrics
+- **Object-Oriented Analysis**: Proper handling of inheritance hierarchies, method complexity, and class coupling
+- **Visual Reporting**: Interactive HTML dashboards with charts and progressive disclosure
+- **Production-Ready Tool**: Modular architecture, error handling, and extensible design
 
-### Objectives
+### Key Features
 
-- Implement comprehensive Halstead metrics calculation
-- Support multiple programming languages (C and Java)
-- Provide visual analysis through charts and graphs
-- Generate professional HTML reports
-- Enable batch processing of multiple files
-- Create a modular, maintainable codebase
-
-### Key Achievements
-
-✅ Multi-language support (C and Java)  
-✅ Automatic language detection  
-✅ Single file and directory processing  
-✅ Visual charts embedded in HTML reports  
-✅ Project-specific output organization  
-✅ Modular architecture for extensibility  
-
----
-
-## Introduction to Halstead Metrics
-
-### Historical Context
-
-Halstead Complexity Metrics were introduced by Maurice H. Halstead in 1977 as part of his "Software Science" theory. These metrics provide a quantitative approach to measuring software complexity based on the number of operators and operands in a program.
-
-### Theoretical Foundation
-
-Halstead's theory is based on the premise that software can be measured using fundamental units:
-- **Operators**: Symbols or keywords that perform operations (e.g., `+`, `if`, `while`, `return`)
-- **Operands**: Variables, constants, and identifiers that operators act upon
-
-### Base Metrics
-
-The analysis begins by counting:
-
-1. **n1**: Number of unique operators
-2. **n2**: Number of unique operands
-3. **N1**: Total occurrences of operators
-4. **N2**: Total occurrences of operands
-
-### Derived Metrics
-
-From these base counts, the following metrics are calculated:
-
-#### 1. Program Vocabulary (n)
-```
-n = n1 + n2
-```
-Total number of unique tokens in the program.
-
-#### 2. Program Length (N)
-```
-N = N1 + N2
-```
-Total number of tokens (operators + operands) in the program.
-
-#### 3. Volume (V)
-```
-V = N × log₂(n)
-```
-Represents the size of the program in "bits" of information. Higher volume indicates more complex code.
-
-#### 4. Difficulty (D)
-```
-D = (n1/2) × (N2/n2)
-```
-Measures how difficult the program is to understand or implement. Higher difficulty suggests more complex logic.
-
-#### 5. Effort (E)
-```
-E = D × V
-```
-Represents the mental effort required to implement the program. Measured in "elementary mental discriminations."
-
-#### 6. Time (T)
-```
-T = E / 18
-```
-Estimated time (in seconds) required to implement the program, based on psychological studies.
-
-#### 7. Program Level (L)
-```
-L = 1 / D
-```
-Represents the abstraction level of the program. Higher level indicates better abstraction.
-
-#### 8. Estimated Bugs (B)
-```
-B = V / 3000
-```
-Estimated number of bugs in the program, based on empirical studies.
-
-### Quality Metrics
-
-In addition to Halstead metrics, the tool calculates:
-
-#### Cyclomatic Complexity (CC)
-Measures the number of independent paths through the code by counting control flow statements (if, while, for, switch, etc.). Lower values indicate simpler control flow.
-
-#### Maintainability Index (MI)
-A composite metric calculated as:
-```
-MI = 171 - 5.2 × ln(V) - 0.23 × CC - 16.2 × ln(LOC)
-```
-Scaled to 0-100, where:
-- **80-100**: Excellent maintainability
-- **50-79**: Good maintainability
-- **0-49**: Poor maintainability (needs refactoring)
-
-#### Logical Lines of Code (LOC)
-Count of non-empty lines of code, excluding comments and blank lines.
+✅ **ANTLR4-Based Parsing**: Uses official Java 20 grammar for accurate AST generation  
+✅ **Two-Pass Analysis**: Separate inheritance graph building and metrics calculation  
+✅ **Complete Metrics Suite**: Halstead, CC, MI, and CK metrics (WMC, DIT, NOC, CBO)  
+✅ **Visual Dashboards**: HTML5 reports with embedded Base64 charts  
+✅ **Progressive Disclosure**: Accordion-style interface for detailed exploration  
+✅ **Self-Contained Reports**: No external dependencies, works offline  
+✅ **Modular Architecture**: Clean separation of concerns, easy to extend  
 
 ---
 
 ## System Architecture
 
-### Modular Design
-
-The project follows a modular architecture, separating concerns into distinct, reusable modules:
+### High-Level Architecture
 
 ```
-halstead/
-├── __init__.py          # Package initialization and public API
-├── constants.py          # Configuration and constants
-├── language_detector.py  # Language detection logic
-├── analyzer.py           # Core metrics calculation
-├── chart_generator.py    # Visualization generation
-├── html_reporter.py      # HTML report creation
-└── file_processor.py     # File/directory processing
+┌─────────────────────────────────────────────────────────┐
+│                    ASTra Tool                            │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌──────────────┐      ┌──────────────┐                │
+│  │   Pass 1     │      │   Pass 2     │                │
+│  │ Graph Builder│─────▶│   Metrics    │                │
+│  │              │      │   Visitor    │                │
+│  └──────────────┘      └──────────────┘                │
+│         │                      │                        │
+│         ▼                      ▼                        │
+│  ┌──────────────┐      ┌──────────────┐                │
+│  │ Inheritance  │      │   Metrics    │                │
+│  │    Graph     │      │  Calculator  │                │
+│  └──────────────┘      └──────────────┘                │
+│                                                          │
+│  ┌──────────────┐      ┌──────────────┐                │
+│  │    Chart     │      │    Report    │                │
+│  │  Generator   │─────▶│  Generator   │                │
+│  └──────────────┘      └──────────────┘                │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+### Two-Pass Analysis Flow
 
-#### 1. `constants.py`
-- Centralized configuration management
-- Terminal color codes for user interface
-- Default paths and supported file extensions
-- Dependency availability checks (matplotlib)
+#### Pass 1: Inheritance Graph Building
+1. **Purpose**: Extract class hierarchies for accurate DIT and NOC calculations
+2. **Process**:
+   - Scan all Java files in the target directory
+   - Parse each file using ANTLR4
+   - Extract class declarations and `extends` relationships
+   - Build a global inheritance graph: `Class → Parent Class`
+   - Handle nested classes and multiple inheritance levels
 
-#### 2. `language_detector.py`
-- Detects programming language from file extensions
-- Validates file support
-- Extensible for additional languages
+3. **Output**: 
+   - Inheritance graph dictionary
+   - Class-to-file mapping
+   - All discovered classes
 
-#### 3. `analyzer.py`
-- Core analysis engine
-- Language-specific keyword and operator definitions
-- Tokenization and parsing
-- Metrics calculation
-- Preprocessing (removes preprocessor directives, imports)
+#### Pass 2: Metrics Calculation
+1. **Purpose**: Calculate all software metrics by traversing ASTs
+2. **Process**:
+   - Parse each Java file into an AST
+   - Visit class declarations
+   - For each method:
+     - Collect operators and operands from tokens
+     - Calculate Cyclomatic Complexity
+     - Calculate Halstead metrics
+   - Aggregate metrics at class level
+   - Calculate CK metrics using inheritance graph
 
-#### 4. `chart_generator.py`
-- Creates visualization charts using matplotlib
-- Generates base64-encoded images for HTML embedding
-- Handles graceful degradation when matplotlib is unavailable
-
-#### 5. `html_reporter.py`
-- Generates professional HTML reports
-- Embeds charts as base64 images
-- Creates styled, responsive reports
-
-#### 6. `file_processor.py`
-- Handles single file processing
-- Recursive directory processing
-- Project-specific output organization
-- Summary generation
-
-#### 7. `Halstead_analyzer.py`
-- Main entry point
-- Command-line interface
-- User interaction and error handling
-- Orchestrates all modules
-
-### Design Principles
-
-1. **Separation of Concerns**: Each module has a single, well-defined responsibility
-2. **Dependency Injection**: Modules accept dependencies as parameters
-3. **Graceful Degradation**: Optional features fail gracefully
-4. **Extensibility**: Easy to add new languages or features
-5. **Testability**: Each module can be tested independently
+3. **Output**:
+   - Per-method metrics
+   - Per-class aggregated metrics
+   - Complete metrics dataset
 
 ---
 
-## Implementation Details
+## Technical Implementation
 
-### Language Support
+### Core Modules
 
-#### C Language
-- **Keywords**: 32 C keywords (auto, break, case, char, const, etc.)
-- **Operators**: Standard C operators including pointer operators (`->`, `*`, `&`)
-- **Preprocessing**: Preprocessor directives (`#include`, `#define`, etc.) are filtered out
-- **File Extensions**: `.c`, `.h`
+#### 1. `graph_builder.py` - Pass 1 Implementation
 
-#### Java Language
-- **Keywords**: 50 Java keywords (abstract, class, extends, implements, etc.)
-- **Operators**: Java operators including `instanceof` and method reference `::`
-- **Imports**: Package and import statements are filtered out
-- **File Extensions**: `.java`
+**Purpose**: Build inheritance graph by scanning all Java files
 
-### Tokenization Process
+**Key Components**:
+- `InheritanceGraphBuilder` class
+- Custom ANTLR visitor for class declarations
+- Methods:
+  - `build_graph_from_directory()`: Recursively scan directory
+  - `build_graph_from_file()`: Parse single file
+  - `calculate_dit()`: Calculate Depth of Inheritance Tree
+  - `calculate_noc()`: Calculate Number of Children
 
-The analyzer uses regular expressions to tokenize source code:
+**Technical Details**:
+- Uses ANTLR4 `FileStream` for file reading
+- Custom error listener to handle syntax errors gracefully
+- Recursive class extraction for nested classes
+- Handles fully qualified class names
 
-1. **String Literals**: `"(?:\\.|[^\\"])*"`
-2. **Character Literals**: `'(?:\\.|[^\\\'])*'`
-3. **Comments**: `//.*?$|/\*.*?\*/` (single-line and multi-line)
-4. **Numbers**: Supports integers, floats, scientific notation, and hexadecimal
-5. **Identifiers**: `[a-zA-Z_][a-zA-Z0-9_]*`
-6. **Operators**: Language-specific operator patterns
-7. **Whitespace**: Skipped during analysis
+#### 2. `metrics_visitor.py` - Pass 2 Implementation
 
-### Cyclomatic Complexity Calculation
+**Purpose**: Core AST traversal and metrics collection
 
-The tool tracks control flow statements to calculate cyclomatic complexity:
-- Base complexity starts at 1
-- Incremented for: `if`, `else`, `while`, `for`, `case`, `catch`, `switch`, `try`, `?`, `&&`, `||`
+**Key Components**:
+- `MetricsVisitor` class (extends `Java20ParserVisitor`)
+- `ClassMetrics` class: Stores class-level metrics
+- `MethodMetrics` class: Stores method-level metrics
 
-### Output Organization
+**Visitor Pattern Implementation**:
+- Overrides visitor methods for:
+  - `visitCompilationUnit()`: Entry point
+  - `visitNormalClassDeclaration()`: Class processing
+  - `visitMethodDeclaration()`: Method processing
+  - `visitConstructorDeclaration()`: Constructor processing
+  - `visitStatement()`: Control flow detection for CC
+  - `visitTerminal()`: Token collection for Halstead
 
-Each analysis creates a project-specific directory structure:
+**Token Classification**:
+- **Operators**: Keywords (if, while, for, etc.), separators (;, {}, ()), arithmetic/logic operators
+- **Operands**: Identifiers, literals (String, Integer, Boolean, Null), constants
 
+**Complexity Calculation**:
+- Base complexity: 1
+- Increments for: if, while, for, switch, case, catch, try, &&, ||, ?
+
+#### 3. `calculator.py` - Mathematical Formulas
+
+**Purpose**: Centralized metric calculation logic
+
+**Classes**:
+- `HalsteadCalculator`: All 12 Halstead metrics
+- `ComplexityCalculator`: Cyclomatic Complexity helpers
+- `MaintainabilityCalculator`: MI calculation and categorization
+- `CKCalculator`: WMC, CBO calculations
+
+**Key Formulas**:
+```python
+# Halstead Metrics
+V = N * log₂(n)                    # Volume
+D = (n1/2) * (N2/n2)              # Difficulty
+E = D * V                          # Effort
+T = E / 18                         # Time
+L = 1 / D                          # Program Level
+B = V / 3000                       # Estimated Bugs
+
+# Maintainability Index
+MI = 171 - 5.2*ln(V) - 0.23*CC - 16.2*ln(LOC)
+# Normalized to 0-100
+
+# CK Metrics
+WMC = Σ(CC of all methods)         # Weighted Methods per Class
+CBO = |external_types|              # Coupling Between Objects
 ```
-output/
-└── {project_name}/
-    ├── c/
-    │   ├── charts/
-    │   │   └── {filename}_chart.png
-    │   └── reports/
-    │       └── {filename}_report.html
-    └── java/
-        ├── charts/
-        │   └── {filename}_chart.png
-        └── reports/
-            └── {filename}_report.html
-```
 
-This organization ensures:
-- Each project has its own output directory
-- Charts and reports are separated by language
-- Easy to locate and manage analysis results
-- No conflicts between different analysis runs
+#### 4. `chart_generator.py` - Visualization
+
+**Purpose**: Generate Matplotlib charts as Base64-encoded images
+
+**Charts Generated**:
+1. **Complexity Scatter Plot**: X-axis = WMC, Y-axis = Halstead Volume
+   - Identifies "hard to maintain" zones
+   - Each dot represents a class
+
+2. **CK Radar Chart**: Compares top classes on WMC, DIT, CBO
+   - Spider/radar plot visualization
+   - Top N classes (default: 5)
+
+3. **MI Distribution Bar**: Distribution of maintainability categories
+   - Green (>85), Yellow (65-85), Red (<65)
+   - Bar chart with counts
+
+**Technical Details**:
+- Uses `matplotlib.use('Agg')` for non-interactive backend
+- Converts figures to Base64 strings for HTML embedding
+- No external image files required
+
+#### 5. `report_generator.py` - HTML Report Generation
+
+**Purpose**: Generate professional HTML5 dashboards
+
+**Report Structure**:
+
+**Section A: Dashboard (Macro Level)**
+- KPI Cards: Total Files, LOC, Average MI, Critical Classes
+- Charts: Side-by-side display using CSS Grid
+
+**Section B: Hall of Shame (Hotspots)**
+- Top 5 Critical Classes table
+- Sorted by lowest MI, then highest WMC
+- Warning colors (red/orange)
+
+**Section C: Accordion Details (Micro Level)**
+- Expandable class list using HTML5 `<details>` and `<summary>`
+- Summary row: Class name, MI badge, WMC, DIT, CBO
+- Details body:
+  - Complete Halstead metrics table (all 12 metrics)
+  - Methods table with complexity and Halstead metrics
+
+**Features**:
+- Progressive disclosure design
+- Self-contained (all CSS inline)
+- Color-coded MI badges
+- Responsive design
+- No JavaScript dependencies
+
+#### 6. `constants.py` - Configuration
+
+**Purpose**: Centralized constants and configuration
+
+**Contents**:
+- Terminal color codes (for CLI output)
+- Default output directory
+- Matplotlib availability check
 
 ---
 
-## Features and Capabilities
+## Metrics Calculation
 
-### Core Features
+### Halstead Complexity Metrics (All 12 Metrics)
 
-1. **Multi-Language Analysis**
-   - Automatic language detection
-   - Language-specific keyword and operator recognition
-   - Appropriate preprocessing for each language
+#### Base Counts
+1. **n₁ (Unique Operators)**: Count of distinct operators
+2. **n₂ (Unique Operands)**: Count of distinct operands
+3. **N₁ (Total Operators)**: Total occurrences of operators
+4. **N₂ (Total Operands)**: Total occurrences of operands
 
-2. **Flexible Input**
-   - Single file analysis
-   - Recursive directory processing
-   - Command-line or interactive input
+#### Derived Metrics
+5. **N (Program Length)**: N₁ + N₂
+6. **n (Vocabulary)**: n₁ + n₂
+7. **V (Volume)**: N × log₂(n) - Program size in bits
+8. **D (Difficulty)**: (n₁/2) × (N₂/n₂) - Implementation difficulty
+9. **E (Effort)**: D × V - Mental effort required
+10. **T (Time)**: E / 18 - Estimated coding time (seconds)
+11. **L (Program Level)**: 1 / D - Program abstraction level
+12. **B (Estimated Bugs)**: V / 3000 - Potential defects
 
-3. **Comprehensive Metrics**
-   - All Halstead base and derived metrics
-   - Cyclomatic complexity
-   - Maintainability index
-   - Lines of code
+**Calculation Level**: Per method, aggregated per class
 
-4. **Visual Analysis**
-   - Quality profile charts (MI, Difficulty, Complexity)
-   - Halstead scale charts (Volume, Effort)
-   - Embedded in HTML reports
+### Cyclomatic Complexity (CC)
 
-5. **Professional Reports**
-   - Styled HTML reports
-   - Embedded charts (base64 encoded)
-   - Detailed metrics tables
-   - Color-coded maintainability scores
+**Definition**: Number of independent paths through the code
 
-6. **User Experience**
-   - Colored terminal output
-   - Progress indicators
-   - Summary reports
-   - Automatic browser opening
+**Increment Rules**:
+- Base complexity: 1
+- +1 for: if, while, for, do, switch, case, catch, try
+- +1 for: &&, || (logical operators)
+- +1 for: ? (ternary operator)
 
-### Advanced Features
+**Calculation Level**: Per method
 
-- **Graceful Error Handling**: Continues processing even if individual files fail
-- **Unicode Support**: Handles various character encodings
-- **Modular Architecture**: Easy to extend and maintain
-- **Project Isolation**: Each analysis has its own output directory
+### Maintainability Index (MI)
+
+**Formula**: 
+```
+MI = 171 - 5.2×ln(V) - 0.23×CC - 16.2×ln(LOC)
+```
+
+**Normalization**: Clamped to 0-100 range
+
+**Categories**:
+- **Green**: MI > 85 (Excellent)
+- **Yellow**: 65 ≤ MI ≤ 85 (Good)
+- **Red**: MI < 65 (Needs Improvement)
+
+**Calculation Level**: Per class
+
+### CK Metrics (Object-Oriented Design)
+
+#### WMC (Weighted Methods per Class)
+- **Definition**: Sum of Cyclomatic Complexity of all methods in a class
+- **Calculation**: Σ(CC of each method)
+- **Interpretation**: Higher WMC = more complex class
+
+#### DIT (Depth of Inheritance Tree)
+- **Definition**: Distance from class to `java.lang.Object`
+- **Calculation**: Traverse inheritance graph upward
+- **Interpretation**: Higher DIT = deeper inheritance hierarchy
+
+#### NOC (Number of Children)
+- **Definition**: Count of direct subclasses
+- **Calculation**: Count classes with this class as parent
+- **Interpretation**: Higher NOC = more responsibility
+
+#### CBO (Coupling Between Objects)
+- **Definition**: Count of unique external types referenced
+- **Calculation**: Count non-primitive, non-builtin types in fields/methods
+- **Interpretation**: Higher CBO = more dependencies
+
+**Calculation Level**: Per class
+
+---
+
+## Visualization & Reporting
+
+### Chart Types
+
+#### 1. Complexity Scatter Plot
+- **X-axis**: Cyclomatic Complexity (WMC)
+- **Y-axis**: Halstead Volume (V)
+- **Purpose**: Identify classes in "hard to maintain" zones
+- **Visualization**: Scatter plot with class labels
+
+#### 2. CK Metrics Radar Chart
+- **Metrics**: WMC, DIT, CBO
+- **Classes**: Top N classes (sorted by WMC)
+- **Purpose**: Compare multiple classes across dimensions
+- **Visualization**: Polar/radar chart with normalized values
+
+#### 3. MI Distribution Bar Chart
+- **Categories**: Green (>85), Yellow (65-85), Red (<65)
+- **Values**: Count of classes in each category
+- **Purpose**: Overall project health overview
+- **Visualization**: Bar chart with color coding
+
+### HTML Report Features
+
+#### Dashboard Section
+- **KPI Cards**: Key metrics at a glance
+- **Charts Grid**: Side-by-side visualizations
+- **Responsive Layout**: CSS Grid for flexible display
+
+#### Hall of Shame Section
+- **Critical Classes**: Top 5 problematic classes
+- **Sorting**: Lowest MI, then highest WMC
+- **Visual Design**: Warning colors, prominent display
+
+#### Accordion Details Section
+- **Progressive Disclosure**: Click to expand classes
+- **Class Summary**: MI badge, WMC, DIT, CBO
+- **Class Details**:
+  - Complete Halstead metrics table (12 metrics)
+  - Methods table with complexity and Halstead metrics
+- **No JavaScript**: Pure HTML5 `<details>` implementation
+
+### Report Styling
+
+- **Modern Design**: Gradient backgrounds, card layouts
+- **Color Coding**: Green/Yellow/Red for MI categories
+- **Typography**: System fonts (system-ui, Segoe UI, Roboto)
+- **Self-Contained**: All CSS inline, no external dependencies
+- **Print-Friendly**: Works offline, can be saved as PDF
+
+---
+
+## Project Structure
+
+```
+PLP_Project/
+├── main.py                      # Entry point, orchestrates two-pass analysis
+├── commands.txt                 # ANTLR4 generation commands
+├── requirements.txt             # Python dependencies
+├── README.md                    # User documentation
+├── PROJECT_REPORT.md            # This comprehensive report
+│
+├── astra/                       # Main package
+│   ├── __init__.py
+│   ├── graph_builder.py         # Pass 1: Inheritance graph building
+│   ├── metrics_visitor.py       # Pass 2: AST traversal and metrics
+│   ├── calculator.py            # Mathematical formulas
+│   ├── chart_generator.py       # Matplotlib visualizations
+│   ├── report_generator.py      # HTML report generation
+│   └── constants.py             # Configuration and constants
+│
+├── grammar/                     # ANTLR grammar files
+│   ├── Java20Lexer.g4          # Java 20 lexer grammar
+│   ├── Java20Parser.g4         # Java 20 parser grammar
+│   ├── Java20Lexer.py          # Generated lexer (from .g4)
+│   ├── Java20Parser.py         # Generated parser (from .g4)
+│   └── Java20ParserVisitor.py  # Generated visitor base class
+│
+├── examples/                    # Example Java files for testing
+│   ├── ComprehensiveExample.java    # Comprehensive test case
+│   └── ComplexInheritance.java     # Deep inheritance test case
+│
+└── output/                     # Generated reports (created automatically)
+    └── *.html                   # HTML analysis reports
+```
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+
+- **Python**: 3.7 or higher
+- **ANTLR4 Tools**: For generating parser files (optional if already generated)
+- **pip**: Python package manager
+
+### Step 1: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs:
+- `matplotlib>=3.5.0`: For chart generation
+- `antlr4-python3-runtime>=4.13.0`: ANTLR4 runtime for Python
+- `numpy>=1.21.0`: For numerical operations in charts
+
+### Step 2: Generate ANTLR Parser Files (If Needed)
+
+If the grammar files have been modified or parser files are missing:
+
+```bash
+# Install ANTLR4 tools (if not already installed)
+pip install antlr4-tools
+
+# Generate Python files from grammar
+cd grammar
+antlr4 -Dlanguage=Python3 -visitor -no-listener Java20Lexer.g4
+antlr4 -Dlanguage=Python3 -visitor -no-listener Java20Parser.g4
+```
+
+**Note**: The generated files are already included in the project, so this step is typically not needed.
+
+### Step 3: Verify Installation
+
+```bash
+python main.py examples --output test.html
+```
+
+If successful, you should see:
+- Phase 1: Building inheritance graph
+- Phase 2: Calculating metrics
+- Phase 3: Generating visualizations
+- Phase 4: Generating HTML report
+- Report saved to `output/test.html`
 
 ---
 
 ## Usage Guide
 
-### Installation
-
-1. **Prerequisites**
-   - Python 3.6 or higher
-   - pip package manager
-
-2. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-   Or manually:
-   ```bash
-   pip install matplotlib
-   ```
-
 ### Basic Usage
 
-#### Interactive Mode
 ```bash
-python Halstead_analyzer.py
+python main.py <input_directory> [--output <filename>]
 ```
-Then enter the file or directory path when prompted.
 
-#### Command-Line Mode
+### Examples
 
-**Single File:**
 ```bash
-python Halstead_analyzer.py examples/example.c
-python Halstead_analyzer.py examples/example.java
+# Analyze examples directory with default output name
+python main.py examples
+
+# Analyze examples directory with custom output name
+python main.py examples --output my_report.html
+
+# Analyze a specific project directory
+python main.py /path/to/java/project --output project_analysis.html
 ```
 
-**Directory:**
-```bash
-python Halstead_analyzer.py examples/
-```
+### Command-Line Arguments
 
-### Programmatic Usage
+- **`input_directory`** (required): Directory containing Java source files
+- **`--output`** (optional): Output HTML report filename (default: `astra_report.html`)
 
-The modules can be imported and used programmatically:
+**Note**: All reports are saved in the `output/` directory automatically.
 
-```python
-from halstead import Analyzer, LanguageDetector, ChartGenerator, HtmlReporter
+### Output
 
-# Detect language
-lang = LanguageDetector.detect('example.java')
+The tool generates:
+1. **HTML Report**: Saved in `output/` directory
+2. **Console Output**: Progress information and summary statistics
 
-# Analyze code
-analyzer = Analyzer(language=lang)
-with open('example.java', 'r') as f:
-    code = f.read()
-result = analyzer.analyze(code, 'example.java')
+### Interpreting the Report
 
-# Generate visualization
-chart_file, chart_base64 = ChartGenerator.generate(result, 'output/charts')
+#### Dashboard Section
+- **KPI Cards**: Quick overview of project metrics
+- **Charts**: Visual representation of complexity and metrics
 
-# Generate report
-report_path = HtmlReporter.generate(result, chart_base64, 'output/reports')
-```
+#### Hall of Shame
+- Focus on classes with lowest MI or highest WMC
+- These are candidates for refactoring
+
+#### Detailed Analysis
+- Expand classes to see:
+  - **Halstead Metrics**: All 12 metrics with descriptions
+  - **Methods**: Individual method complexity and Halstead metrics
+- Use this for detailed code review
 
 ---
 
-## Output Structure
+## Design Decisions
 
-### Directory Organization
+### Why Two-Pass Analysis?
 
-When analyzing a file or directory, the tool creates a project-specific output structure:
+**Problem**: CK metrics (DIT, NOC) require knowledge of the complete inheritance hierarchy, which may span multiple files.
 
-**Example: Analyzing `examples/example.c`**
-```
-output/
-└── example/
-    └── c/
-        ├── charts/
-        │   └── example_chart.png
-        └── reports/
-            └── example_report.html
-```
+**Solution**: 
+- **Pass 1**: Build global inheritance graph by scanning all files
+- **Pass 2**: Calculate metrics with access to complete hierarchy
 
-**Example: Analyzing `examples/` directory**
-```
-output/
-└── examples/
-    ├── c/
-    │   ├── charts/
-    │   │   ├── example_chart.png
-    │   │   └── simple_chart.png
-    │   └── reports/
-    │       ├── example_report.html
-    │       └── simple_report.html
-    └── java/
-        ├── charts/
-        │   ├── example_chart.png
-        │   └── simple_chart.png
-        └── reports/
-            ├── example_report.html
-            └── simple_report.html
-```
+**Benefits**:
+- Accurate DIT calculation (can traverse to Object)
+- Accurate NOC calculation (can find all children)
+- Separation of concerns (graph building vs. metrics calculation)
 
-### HTML Report Contents
+### Why ANTLR4?
 
-Each HTML report includes:
+**Alternatives Considered**:
+- Regex-based tokenization (simpler but inaccurate)
+- Built-in AST parsers (language-specific, less flexible)
 
-1. **Header Section**
-   - File name and path
-   - Analysis timestamp
-   - Language badge
+**Choice**: ANTLR4
 
-2. **Maintainability Index**
-   - Large, color-coded score
-   - Visual indicator (green/yellow/red)
+**Reasons**:
+- **Accuracy**: Official Java 20 grammar ensures correct parsing
+- **AST Access**: Full syntax tree for precise metrics
+- **Extensibility**: Easy to add new metrics or languages
+- **Industry Standard**: Widely used, well-documented
 
-3. **Visual Charts**
-   - Quality Profile (MI, Difficulty, Complexity)
-   - Halstead Scale (Volume, Effort) - logarithmic scale
+### Why Visitor Pattern?
 
-4. **Halstead Overview Cards**
-   - Program Level (L)
-   - Volume (V)
-   - Difficulty (D)
-   - Effort (E)
+**Benefits**:
+- **Separation of Concerns**: Parsing logic separate from analysis logic
+- **Extensibility**: Easy to add new visitors for different analyses
+- **Maintainability**: Clear structure, easy to understand
+- **ANTLR Integration**: Native support in ANTLR4
 
-5. **Detailed Metrics Table**
-   - All base metrics (n1, n2, N1, N2)
-   - All derived metrics (V, D, E, T, L, B)
-   - Quality metrics (CC, LOC)
-   - Descriptions for each metric
+### Why Self-Contained HTML?
+
+**Benefits**:
+- **Portability**: Report can be shared without dependencies
+- **Offline Access**: Works without internet connection
+- **Version Control**: No external resource versioning issues
+- **Simplicity**: Single file to manage
+
+### Why Progressive Disclosure?
+
+**Benefits**:
+- **Usability**: Users see high-level first, details on demand
+- **Performance**: Large reports load faster (details hidden initially)
+- **Focus**: Helps users identify critical issues first
+- **No JavaScript**: Pure HTML5, works everywhere
 
 ---
 
-## Example Analysis
+## Testing & Validation
 
-### Example 1: Simple C Program
+### Test Cases
 
-**Input:** `examples/simple.c`
-```c
-#include <stdio.h>
+#### Example Files
 
-int main() {
-    int a = 10;
-    int b = 5;
-    int sum = a + b;
-    printf("Sum: %d\n", sum);
-    return 0;
-}
-```
+1. **`ComprehensiveExample.java`**:
+   - Multiple inheritance levels (DIT = 0, 1, 2)
+   - Various control flow structures (if, while, for, switch, try-catch)
+   - Logical operators (&&, ||)
+   - External type references (CBO)
+   - Nested classes
+   - Multiple methods with varying complexity
 
-**Typical Results:**
-- **Volume (V)**: ~50-100
-- **Difficulty (D)**: ~2-5
-- **Effort (E)**: ~100-500
-- **Maintainability Index**: 85-95 (Excellent)
-- **Cyclomatic Complexity**: 1
+2. **`ComplexInheritance.java`**:
+   - Deep inheritance hierarchy (DIT = 0, 1, 2, 3)
+   - Multiple children (NOC testing)
+   - Complex control flow
+   - Abstract classes and interfaces
 
-### Example 2: Complex Java Program
+### Validation
 
-**Input:** `examples/example.java`** (Student Management System)
+#### Metrics Validation
+- **Halstead Metrics**: Verified against manual calculations
+- **Cyclomatic Complexity**: Verified against McCabe's method
+- **MI**: Verified against standard formula
+- **CK Metrics**: Verified against Chidamber & Kemerer definitions
 
-**Typical Results:**
-- **Volume (V)**: ~500-1000
-- **Difficulty (D)**: ~10-20
-- **Effort (E)**: ~5000-20000
-- **Maintainability Index**: 60-80 (Good)
-- **Cyclomatic Complexity**: 5-15
+#### Output Validation
+- **Report Generation**: All sections render correctly
+- **Charts**: Base64 encoding works, images display
+- **Accordion**: Expand/collapse functionality works
+- **Responsive Design**: Works on different screen sizes
 
-### Interpreting Results
+### Known Limitations
 
-**Low Complexity (Good):**
-- Volume < 500
-- Difficulty < 10
-- Maintainability Index > 80
-- Cyclomatic Complexity < 10
-
-**Medium Complexity (Acceptable):**
-- Volume 500-1000
-- Difficulty 10-20
-- Maintainability Index 50-80
-- Cyclomatic Complexity 10-20
-
-**High Complexity (Needs Refactoring):**
-- Volume > 1000
-- Difficulty > 20
-- Maintainability Index < 50
-- Cyclomatic Complexity > 20
+1. **LOC Calculation**: Currently uses token-based heuristic; could be improved with line number tracking
+2. **External Types**: CBO calculation may include some built-in types
+3. **Nested Classes**: Fully supported but may affect class count
+4. **Annotations**: Not fully analyzed (may affect token counts)
 
 ---
 
-## Technical Specifications
+## Future Enhancements
 
-### System Requirements
+### Potential Improvements
 
-- **Python Version**: 3.6 or higher
-- **Operating System**: Cross-platform (Windows, Linux, macOS)
-- **Dependencies**: 
-  - `matplotlib` (optional, for charts)
-  - Standard library only (re, math, os, pathlib, etc.)
+1. **Enhanced LOC Calculation**
+   - Track line numbers from AST
+   - More accurate logical LOC
 
-### Performance Characteristics
+2. **Additional Metrics**
+   - LCOM (Lack of Cohesion of Methods)
+   - RFC (Response for a Class)
+   - Fan-in/Fan-out
 
-- **Processing Speed**: ~100-1000 lines per second (depending on complexity)
-- **Memory Usage**: Minimal (processes files sequentially)
-- **Scalability**: Handles large codebases efficiently
-
-### Supported File Formats
-
-- **C Source Files**: `.c`, `.h`
-- **Java Source Files**: `.java`
-- **Text Encoding**: UTF-8 (with fallback handling)
-
-### Error Handling
-
-- **File Not Found**: Clear error message
-- **Unsupported File Type**: Warning, skip file
-- **Parse Errors**: Graceful degradation, continue processing
-- **Missing Dependencies**: Charts disabled, analysis continues
-
----
-
-## Limitations and Future Work
-
-### Current Limitations
-
-1. **Language Support**: Currently supports only C and Java
-2. **Preprocessing**: C macros are removed but not expanded
-3. **Context Awareness**: No semantic analysis or type checking
-4. **Dependencies**: Does not analyze external library calls
-5. **Multi-file Analysis**: Each file analyzed independently
-
-### Potential Enhancements
-
-1. **Additional Languages**
-   - Python
-   - C++
-   - JavaScript
-   - C#
-
-2. **Advanced Features**
-   - Comparison reports between files
+3. **Comparison Features**
+   - Compare metrics across versions
    - Trend analysis over time
-   - Custom threshold configuration
-   - Export to JSON/CSV formats
+   - Diff reports
 
-3. **Integration**
-   - CI/CD pipeline integration
-   - IDE plugins
-   - API interface (REST/GraphQL)
-   - GUI application
+4. **Export Formats**
+   - JSON export for programmatic access
+   - CSV export for spreadsheet analysis
+   - PDF export for documentation
 
-4. **Analysis Improvements**
-   - Semantic analysis
-   - Type-aware metrics
-   - Dependency analysis
-   - Code smell detection
+5. **CI/CD Integration**
+   - Command-line flags for automation
+   - Exit codes based on thresholds
+   - JUnit XML output format
 
----
+6. **Configuration**
+   - Customizable thresholds
+   - Metric selection
+   - Report template customization
 
-## Conclusion
+7. **Performance**
+   - Parallel file processing
+   - Caching for large projects
+   - Incremental analysis
 
-### Summary
-
-The Halstead Metrics Analyzer successfully implements a comprehensive static code analysis tool that:
-
-- Calculates all Halstead complexity metrics accurately
-- Supports multiple programming languages (C and Java)
-- Provides visual analysis through embedded charts
-- Generates professional HTML reports
-- Organizes output in a clean, project-specific structure
-- Follows modular architecture principles for maintainability
-
-### Educational Value
-
-This project demonstrates:
-
-- **Software Engineering Principles**: Modular design, separation of concerns
-- **Static Analysis**: Code analysis without execution
-- **Software Metrics**: Quantitative code quality measurement
-- **Multi-paradigm Programming**: Handling different programming paradigms
-- **Python Best Practices**: Package structure, error handling, documentation
-
-### Practical Applications
-
-The tool can be used for:
-
-- **Code Review**: Identify complex code sections
-- **Refactoring Guidance**: Find areas needing improvement
-- **Quality Assurance**: Maintain code quality standards
-- **Educational Purposes**: Understand code complexity
-- **Research**: Study software metrics and complexity
-
-### Final Notes
-
-The modular architecture makes the tool:
-- **Extensible**: Easy to add new languages or features
-- **Maintainable**: Clear separation of concerns
-- **Testable**: Each module can be tested independently
-- **Reusable**: Components can be used in other projects
+8. **Language Support**
+   - Python analysis
+   - C++ analysis
+   - Multi-language projects
 
 ---
 
 ## References
 
-1. Halstead, M. H. (1977). *Elements of Software Science*. Elsevier North-Holland.
-2. McCabe, T. J. (1976). A Complexity Measure. *IEEE Transactions on Software Engineering*, SE-2(4), 308-320.
-3. Oman, P., & Hagemeister, J. (1992). Metrics for assessing a software system's maintainability. *Proceedings of the Conference on Software Maintenance*.
+### Academic References
+
+1. **Halstead, M. H.** (1977). *Elements of Software Science*. Elsevier North-Holland.
+   - Original work on Halstead Complexity Metrics
+
+2. **McCabe, T. J.** (1976). A Complexity Measure. *IEEE Transactions on Software Engineering*, SE-2(4), 308-320.
+   - Cyclomatic Complexity definition
+
+3. **Chidamber, S. R., & Kemerer, C. F.** (1994). A Metrics Suite for Object Oriented Design. *IEEE Transactions on Software Engineering*, 20(6), 476-493.
+   - CK Metrics suite definition
+
+4. **Coleman, D., et al.** (1994). Using Metrics to Evaluate Software System Maintainability. *Computer*, 27(8), 44-49.
+   - Maintainability Index formula
+
+### Technical References
+
+1. **ANTLR4 Documentation**: https://www.antlr.org/
+   - Parser generator framework
+
+2. **Java Language Specification**: https://docs.oracle.com/javase/specs/
+   - Java 20 grammar reference
+
+3. **Matplotlib Documentation**: https://matplotlib.org/
+   - Visualization library
+
+### Tools & Libraries
+
+- **ANTLR4**: Parser generator (v4.13+)
+- **Matplotlib**: Visualization library (v3.5+)
+- **NumPy**: Numerical computing (v1.21+)
+- **Python**: Programming language (v3.7+)
 
 ---
 
-## Appendix
+## Conclusion
 
-### Project Files
+ASTra represents a comprehensive solution for Java static analysis, combining:
+- **Rigorous Metrics**: Industry-standard formulas and calculations
+- **Modern Architecture**: Two-pass analysis, visitor pattern, modular design
+- **Professional Reporting**: Interactive HTML5 dashboards with visualizations
+- **Production Quality**: Error handling, extensibility, maintainability
 
-- `Halstead_analyzer.py` - Main entry point
-- `halstead/` - Package directory with all modules
-- `examples/` - Sample C and Java files for testing
-- `requirements.txt` - Python dependencies
-- `README.md` - User documentation
-- `PROJECT_REPORT.md` - This comprehensive report
+The tool successfully demonstrates:
+- Advanced compiler construction techniques (ANTLR4, AST traversal)
+- Software engineering best practices (modularity, separation of concerns)
+- Data visualization (charts, progressive disclosure)
+- User experience design (intuitive interface, actionable insights)
 
-### Example Files
-
-The `examples/` directory contains:
-- `example.c` - Complex calculator program
-- `simple.c` - Basic C example
-- `example.java` - Student management system
-- `simple.java` - Simple Java calculator
+ASTra is ready for use in software development workflows, providing developers with actionable insights into code quality and maintainability.
 
 ---
 
-**Project Developed For**: Programming Paradigms and Languages Course  
-**Master's Degree in Computer Engineering**  
-**Academic Year**: 2024-2025
-
----
-
-*End of Report*
+**Project Version**: 1.0.0  
+**Last Updated**: 2024  
+**License**: Academic/Educational Use
 

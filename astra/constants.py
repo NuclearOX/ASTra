@@ -1,5 +1,5 @@
 """
-Constants and configuration for the Halstead Analyzer
+Constants and configuration for ASTra
 """
 
 # Terminal color management
@@ -14,12 +14,6 @@ class C:
 
 # Default output directory
 DEFAULT_OUTPUT_DIR = "output"
-
-# Supported file extensions
-SUPPORTED_EXTENSIONS = {
-    'c': ['.c', '.h'],
-    'java': ['.java']
-}
 
 # Matplotlib configuration
 try:

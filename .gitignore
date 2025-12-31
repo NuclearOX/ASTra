@@ -1,2 +1,13 @@
-CODE_CHECKUP.md
+__pycache__/
+
+.venv/
+
+grammar/*
+
+!grammar/Java20Lexer.g4
+!grammar/Java20Parser.g4
+
+output/
+*.html
+
 PROJECT_REPORT.md

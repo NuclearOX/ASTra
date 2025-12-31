@@ -1,312 +1,282 @@
-# Halstead Metrics Analyzer
+# ASTra - Java Static Analysis Tool
 
-## Project Overview
+[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/)
+[![ANTLR4](https://img.shields.io/badge/ANTLR4-4.13+-green.svg)](https://www.antlr.org/)
+[![License](https://img.shields.io/badge/License-Academic-lightgrey.svg)](LICENSE)
 
-This project is a **Static Code Analysis Tool** developed for the "Programming Paradigms and Languages" course in the Master's Degree in Computer Engineering. The tool implements **Halstead Complexity Metrics** to analyze code complexity and maintainability for both **C** and **Java** programming languages.
+**ASTra** (Java Automated Static Analysis) is a comprehensive static analysis tool that analyzes Java source code by generating and traversing Abstract Syntax Trees (ASTs) using ANTLR4. The tool calculates rigorous software metrics and generates professional HTML5 dashboards with visualizations.
 
-## Features
+## 🚀 Features
 
-- ✅ **Multi-language Support**: Analyzes both C (`.c`, `.h`) and Java (`.java`) files
-- ✅ **Automatic Language Detection**: Detects programming language from file extension
-- ✅ **Single File Analysis**: Analyze individual source files
-- ✅ **Directory Processing**: Recursively analyze all supported files in a directory
-- ✅ **Interactive Mode**: User-friendly command-line interface
-- ✅ **Visual Reports**: HTML reports with embedded charts and graphs
-- ✅ **Organized Output**: Results organized in subdirectories by language
-- ✅ **Comprehensive Metrics**: Calculates all Halstead metrics plus quality indicators
+- ✅ **ANTLR4-Based Parsing**: Uses official Java 20 grammar for accurate AST generation
+- ✅ **Two-Pass Analysis**: Separate inheritance graph building and metrics calculation
+- ✅ **Complete Metrics Suite**: 
+  - **Halstead Metrics**: All 12 metrics (n₁, n₂, N₁, N₂, N, n, V, D, E, T, L, B)
+  - **Cyclomatic Complexity**: Independent paths through code
+  - **Maintainability Index**: Code maintainability score (0-100)
+  - **CK Metrics**: WMC, DIT, NOC, CBO (Object-Oriented Design metrics)
+- ✅ **Visual Dashboards**: HTML5 reports with embedded Base64 charts
+- ✅ **Progressive Disclosure**: Accordion-style interface for detailed exploration
+- ✅ **Self-Contained Reports**: No external dependencies, works offline
+- ✅ **Modular Architecture**: Clean separation of concerns, easy to extend
 
-## Halstead Metrics Explained
+## 📋 Table of Contents
 
-The tool calculates the following metrics based on Halstead's Software Science:
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Metrics Explained](#metrics-explained)
+- [Report Structure](#report-structure)
+- [Project Structure](#project-structure)
+- [Examples](#examples)
+- [Technical Details](#technical-details)
+- [Contributing](#contributing)
+- [License](#license)
 
-### Base Metrics
-- **n1**: Number of unique operators
-- **n2**: Number of unique operands
-- **N1**: Total number of operator occurrences
-- **N2**: Total number of operand occurrences
-
-### Derived Metrics
-- **n = n1 + n2**: Program vocabulary (total unique tokens)
-- **N = N1 + N2**: Program length (total tokens)
-- **V = N × log₂(n)**: Program volume (size in bits)
-- **D = (n1/2) × (N2/n2)**: Program difficulty
-- **E = D × V**: Programming effort (mental effort required)
-- **T = E / 18**: Time to implement (in seconds)
-- **L = 1/D**: Program level (abstraction level)
-- **B = V / 3000**: Estimated number of bugs
-
-### Quality Metrics
-- **Cyclomatic Complexity (CC)**: Number of independent paths through the code
-- **Maintainability Index (MI)**: Code maintainability score (0-100)
-- **Logical LOC**: Lines of code (excluding empty lines)
-
-## Installation
+## 🔧 Installation
 
 ### Prerequisites
 
-- Python 3.6 or higher
+- Python 3.8 or higher
 - pip (Python package manager)
+- Java Runtime Environment (JRE) - required only for ANTLR generation tool
 
-### Required Packages
+### Step 1: Clone or Download
 
 ```bash
-pip install matplotlib
+git clone <repository-url>
+cd PLP_Project
 ```
 
-Or install from requirements.txt:
+### Step 2: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-The tool will work without matplotlib, but charts will be disabled.
+This installs:
+- `matplotlib>=3.5.0` - For chart generation
+- `antlr4-python3-runtime>=4.13.0` - ANTLR4 runtime
+- `numpy>=1.21.0` - For numerical operations
 
-### Project Structure
+### Step 2.5: Generate Parser
 
-The project uses a modular architecture:
+Before running the tool, you must generate the Python lexer and parser from the grammar files.
+
+```bash
+# Run the commands specified in commands.txt
+antlr4 -Dlanguage=Python3 -visitor -no-listener grammar/Java20Lexer.g4
+antlr4 -Dlanguage=Python3 -visitor -no-listener grammar/Java20Parser.g4
+```
+
+### Step 3: Verify Installation
+
+```bash
+python main.py examples --output test.html
+```
+
+If successful, you should see analysis progress and a report generated in `output/test.html`.
+
+## 🚀 Quick Start
+
+```bash
+# Analyze a Java project directory
+python main.py examples
+
+# With custom output filename
+python main.py examples --output my_analysis.html
+
+# Analyze any Java project
+python main.py /path/to/java/project
+```
+
+All reports are automatically saved in the `output/` directory.
+
+## 📖 Usage
+
+### Basic Command
+
+```bash
+python main.py <input_directory> [--output <filename>]
+```
+
+### Arguments
+
+- **`input_directory`** (required): Directory containing Java source files (`.java`)
+- **`--output`** (optional): Output HTML report filename (default: `astra_report.html`)
+
+### Examples
+
+```bash
+# Analyze examples with default output
+python main.py examples
+
+# Custom output filename
+python main.py examples --output project_analysis.html
+
+# Analyze a full project
+python main.py /path/to/my/java/project --output project_report.html
+```
+
+### Output
+
+The tool generates:
+1. **Console Output**: Progress information and summary statistics
+2. **HTML Report**: Saved in `output/` directory with:
+   - Dashboard with KPI cards
+   - Visual charts (scatter plot, radar chart, distribution)
+   - Hall of Shame (top 5 critical classes)
+   - Detailed class analysis with accordion interface
+
+## 📊 Metrics Explained
+
+### Halstead Complexity Metrics
+
+**Base Counts**:
+- **n₁**: Unique operators count
+- **n₂**: Unique operands count
+- **N₁**: Total operator occurrences
+- **N₂**: Total operand occurrences
+
+**Derived Metrics**:
+- **N**: Program Length (N₁ + N₂)
+- **n**: Vocabulary (n₁ + n₂)
+- **V**: Volume (N × log₂(n)) - Program size in bits
+- **D**: Difficulty ((n₁/2) × (N₂/n₂)) - Implementation difficulty
+- **E**: Effort (D × V) - Mental effort required
+- **T**: Time (E / 18) - Estimated coding time (seconds)
+- **L**: Program Level (1 / D) - Program abstraction level
+- **B**: Estimated Bugs (V / 3000) - Potential defects
+
+### Cyclomatic Complexity (CC)
+
+Measures the number of independent paths through code. Increments for:
+- Control flow statements: `if`, `while`, `for`, `switch`, `case`, `catch`, `try`
+- Logical operators: `&&`, `||`
+- Ternary operator: `?`
+
+**Interpretation**:
+- 1-10: Simple
+- 11-20: Moderate
+- 21-50: Complex
+- 50+: Very complex (needs refactoring)
+
+### Maintainability Index (MI)
+
+Formula: `MI = 171 - 5.2×ln(V) - 0.23×CC - 16.2×ln(LOC)`
+
+**Categories**:
+- **Green (MI > 85)**: Excellent maintainability
+- **Yellow (65 ≤ MI ≤ 85)**: Good maintainability
+- **Red (MI < 65)**: Needs improvement
+
+### CK Metrics (Object-Oriented Design)
+
+- **WMC (Weighted Methods per Class)**: Sum of Cyclomatic Complexity of all methods
+- **DIT (Depth of Inheritance Tree)**: Distance from class to `java.lang.Object`
+- **NOC (Number of Children)**: Count of direct subclasses
+- **CBO (Coupling Between Objects)**: Count of unique external types referenced
+
+## 📄 Report Structure
+
+The generated HTML report contains three main sections:
+
+### Section A: Dashboard
+- **KPI Cards**: Total Files, LOC, Average MI, Critical Classes
+- **Charts**: Complexity Scatter Plot and CK Metrics Radar Chart side-by-side
+
+### Section B: Hall of Shame
+- **Top 5 Critical Classes**: Classes with lowest MI or highest WMC
+- Highlighted with warning colors for immediate attention
+
+### Section C: Detailed Analysis
+- **Accordion Interface**: Expandable class list
+- **Class Summary**: MI badge, WMC, DIT, CBO
+- **Class Details**:
+  - Complete Halstead metrics table (all 12 metrics with descriptions)
+  - Methods table with complexity and Halstead metrics
+
+## 📁 Project Structure
 
 ```
 PLP_Project/
-├── Halstead_analyzer.py  # Main entry point
-├── halstead/              # Package directory
-│   ├── __init__.py
-│   ├── constants.py
-│   ├── language_detector.py
-│   ├── analyzer.py
-│   ├── chart_generator.py
-│   ├── html_reporter.py
-│   └── file_processor.py
-├── examples/              # Example source files
-│   ├── example.c
-│   ├── simple.c
-│   ├── example.java
-│   └── simple.java
-├── output/                # Generated reports (created automatically)
-├── requirements.txt
-└── README.md
+├── main.py                      # Entry point
+├── requirements.txt             # Dependencies
+├── commands.txt                 # ANTLR4 generation commands
+│
+├── astra/                       # Main package
+│   ├── graph_builder.py         # Pass 1: Inheritance graph
+│   ├── metrics_visitor.py       # Pass 2: AST traversal
+│   ├── calculator.py            # Mathematical formulas
+│   ├── chart_generator.py       # Visualizations
+│   ├── report_generator.py      # HTML reports
+│   └── constants.py             # Configuration
+│
+├── grammar/                     # ANTLR grammar files
+│   ├── Java20Lexer.g4          # Lexer grammar
+│   ├── Java20Parser.g4         # Parser grammar
+│   └── [Generated Python files]
+│
+├── examples/                    # Example Java files
+│   ├── ComprehensiveExample.java
+│   └── ComplexInheritance.java
+│
+└── output/                     # Generated reports
+    └── *.html
 ```
 
-## Usage
+## 💡 Examples
 
-### Basic Usage
+The `examples/` directory contains comprehensive test cases:
 
-Run the script and follow the interactive prompts:
+- **`ComprehensiveExample.java`**: Demonstrates various Java constructs, inheritance, and control flow
+- **`ComplexInheritance.java`**: Deep inheritance hierarchy for testing DIT and NOC
+
+Run analysis on examples:
 
 ```bash
-python Halstead_analyzer.py
+python main.py examples
 ```
 
-When prompted, enter either:
-- A **file path** (e.g., `examples/example.c` or `examples/example.java`)
-- A **directory path** (e.g., `examples/`) to analyze all supported files
+## 🔬 Technical Details
 
-### Command Line Usage
+### Two-Pass Analysis
 
-You can also pass the file or directory as a command-line argument:
+**Pass 1: Inheritance Graph Building**
+- Scans all Java files
+- Extracts class declarations and `extends` relationships
+- Builds global inheritance graph for accurate DIT/NOC calculation
 
-```bash
-# Analyze a single file
-python Halstead_analyzer.py examples/example.c
-
-# Analyze a directory
-python Halstead_analyzer.py examples/
-```
-
-### Example Commands
-
-```bash
-# Analyze a C file
-python Halstead_analyzer.py examples/example.c
-
-# Analyze a Java file
-python Halstead_analyzer.py examples/example.java
-
-# Analyze all files in examples directory
-python Halstead_analyzer.py examples/
-```
-
-## Output Structure
-
-The tool generates organized output in the `output/` directory.
-
-### Report Contents
-
-Each HTML report includes:
-- **Maintainability Index** with color-coded score
-- **Visual Charts**: Quality profile and Halstead scale graphs (embedded as base64)
-- **Halstead Overview**: Key metrics in card format
-- **Detailed Metrics Table**: Complete breakdown of all calculated metrics
-- **Language Badge**: Indicates the analyzed language
-
-## Example Files
-
-The `examples/` directory contains sample files for testing:
-
-## How It Works
-
-### 1. Language Detection
-The tool automatically detects the programming language from the file extension:
-- `.c`, `.h` → C language
-- `.java` → Java language
-
-### 2. Tokenization
-The code is tokenized into:
-- **Operators**: Keywords, symbols, and operators
-- **Operands**: Identifiers, literals, and constants
-- Comments and whitespace are ignored
-
-### 3. Metrics Calculation
-- Counts unique and total operators/operands
-- Calculates Halstead metrics using the formulas
-- Computes cyclomatic complexity by tracking control flow statements
-- Calculates maintainability index
-
-### 4. Visualization
-- Generates charts using matplotlib (if available)
-- Embeds charts as base64-encoded images in HTML reports
-- Creates professional HTML reports with styling
-
-### 5. Output Organization
-- Creates language-specific subdirectories
-- Separates charts and reports
-- Maintains clean file structure
-
-## Language-Specific Features
-
-### C Language Support
-- C keywords (auto, break, case, char, const, etc.)
-- C operators (including pointer operators `->`, `*`, `&`)
-- Preprocessor directives are filtered out
-- Header files (`.h`) are supported
-
-### Java Language Support
-- Java keywords (abstract, class, extends, implements, etc.)
-- Java operators (including `instanceof`, `::`)
-- Package and import statements are filtered out
-- Object-oriented constructs are properly recognized
-
-## Interpreting Results
-
-### Maintainability Index (MI)
-- **80-100**: Excellent - Code is highly maintainable
-- **50-79**: Good - Code is reasonably maintainable
-- **0-49**: Poor - Code needs refactoring
-
-### Volume (V)
-- Lower values indicate more concise code
-- Higher values suggest more complex implementations
-
-### Difficulty (D)
-- Measures how hard the code is to understand
-- Lower values are better
-
-### Effort (E)
-- Mental effort required to implement the code
-- Used to estimate development time
-
-### Cyclomatic Complexity (CC)
-- Measures code complexity through control flow
-- Lower values (1-10) are ideal
-- Higher values suggest need for refactoring
-
-## Technical Details
+**Pass 2: Metrics Calculation**
+- Parses each file into AST using ANTLR4
+- Traverses AST using visitor pattern
+- Collects tokens (operators/operands) for Halstead metrics
+- Calculates Cyclomatic Complexity from control flow
+- Aggregates metrics at class level
 
 ### Architecture
 
-The tool is organized into a modular package structure:
+- **Modular Design**: Each component has a single responsibility
+- **Visitor Pattern**: Clean separation of parsing and analysis
+- **Error Handling**: Graceful handling of syntax errors
+- **Extensibility**: Easy to add new metrics or visualizations
 
-```
-halstead/
-├── __init__.py          # Package initialization and exports
-├── constants.py          # Constants, configuration, and color codes
-├── language_detector.py  # Language detection from file extensions
-├── analyzer.py           # Core Halstead metrics calculation
-├── chart_generator.py    # Visualization chart generation
-├── html_reporter.py      # HTML report generation
-└── file_processor.py     # File and directory processing logic
-```
+## 🤝 Contributing
 
-**Main Components:**
+This is an academic project. For improvements or bug reports, please create an issue or submit a pull request.
 
-1. **`LanguageDetector`**: Detects programming language from file extension
-2. **`Analyzer`**: Performs tokenization and metrics calculation
-3. **`ChartGenerator`**: Creates visualization charts
-4. **`HtmlReporter`**: Generates HTML reports with embedded graphics
-5. **`file_processor`**: Handles single file and directory processing
+## 📝 License
 
-**Main Entry Point:**
-- **`Halstead_analyzer.py`**: Command-line interface that uses the modular components
+This project is developed for academic/educational purposes.
 
-### Token Recognition
+## 🙏 Acknowledgments
 
-The analyzer uses regular expressions to identify:
-- String literals
-- Character literals
-- Comments (single-line and multi-line)
-- Numbers (integers, floats, hex)
-- Identifiers
-- Operators
-- Whitespace
-
-### Error Handling
-
-- Gracefully handles missing matplotlib
-- Skips unsupported file types
-- Provides clear error messages
-- Continues processing even if individual files fail
-
-## Limitations
-
-1. **Preprocessing**: C preprocessor macros are removed but not expanded
-2. **Context**: Does not perform semantic analysis
-3. **Dependencies**: Does not analyze external library calls
-4. **Multi-file**: Each file is analyzed independently
-
-## Future Enhancements
-
-Potential improvements:
-- Support for more languages (Python, C++, etc.)
-- Comparison reports between files
-- Trend analysis over time
-- Integration with CI/CD pipelines
-- Export to JSON/CSV formats
-- Custom threshold configuration
-
-## Academic Context
-
-This project demonstrates:
-- **Static Analysis**: Code analysis without execution
-- **Software Metrics**: Quantitative code quality measurement
-- **Software Engineering**: Best practices in tool development
-- **Multi-paradigm Support**: Handling different programming paradigms
-
-## References
-
-- Halstead, M. H. (1977). *Elements of Software Science*. Elsevier.
-- McCabe, T. J. (1976). A Complexity Measure. *IEEE Transactions on Software Engineering*.
-
-## License
-
-This project is developed for academic purposes as part of the Master's Degree in Computer Engineering curriculum.
+- **ANTLR4**: Parser generator framework
+- **Java Language Specification**: Official Java grammar
+- **Halstead, McCabe, Chidamber & Kemerer**: Original metric definitions
 
 ---
 
-## Quick Start Guide
+**Version**: 1.0.0  
+**Last Updated**: 2025
 
-1. **Install dependencies**:
-   ```bash
-   pip install matplotlib
-   ```
-
-2. **Run the analyzer**:
-   ```bash
-   python Halstead_analyzer.py
-   ```
-
-3. **Enter a file or directory path** when prompted
-
-4. **View the generated HTML reports** in the `output/` directory
-
-5. **Open reports in your browser** to see visualizations and metrics
-
----

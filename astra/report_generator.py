@@ -5,6 +5,7 @@ Generates a professional, self-contained HTML5 dashboard with progressive disclo
 
 from typing import Dict, List
 from datetime import datetime
+from astra.advisor import RefactoringAdvisor  
 
 
 class ReportGenerator:
@@ -429,6 +430,28 @@ class ReportGenerator:
             font-weight: 600;
             text-align: right;
         }}
+
+        /* Advisor Box Style */
+        .advisor-box {{
+            background: #fff3cd; 
+            border: 1px solid #ffeeba; 
+            color: #856404;
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-bottom: 20px;
+        }}
+        .advisor-box h4 {{ 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+        }}
+        .advisor-box ul {{ 
+            padding-left: 20px; 
+            margin: 0; 
+        }}
+        .advisor-box li {{ 
+            margin-bottom: 5px; 
+        }}
     </style>
 </head>
 <body>
@@ -589,6 +612,18 @@ class ReportGenerator:
             halstead = cls.get('halstead', {})
             
             mi_badge = ReportGenerator._get_mi_badge(mi)
+
+            tips = cls.get('refactoring_tips', [])
+            tips_html = ""
+
+            if tips:
+                tips_list = "".join([f"<li>{t}</li>" for t in tips])
+                tips_html = f"""
+                <div class="advisor-box">
+                    <h4>💡 Refactoring Suggestions</h4>
+                    <ul>{tips_list}</ul>
+                </div>
+                """
             
             # Generate Halstead metrics section
             halstead_html = ReportGenerator._generate_halstead_section(halstead)
@@ -661,7 +696,10 @@ class ReportGenerator:
                             <span class="metric-value">CBO: {cbo}</span>
                         </div>
                     </summary>
-                    {halstead_html}
+                    <div class="class-details">
+                        {tips_html}
+                        {halstead_html}
+                    </div>
                     {methods_html}
                 </details>
             </div>
@@ -848,6 +886,8 @@ class ReportGenerator:
         }
         
         for cls in classes:
+            tips = RefactoringAdvisor.get_class_advice(cls)
+
             class_data = {
                 'name': cls.class_name,
                 'mi': cls.maintainability_index,
@@ -856,7 +896,8 @@ class ReportGenerator:
                 'cbo': cls.cbo,
                 'halstead_effort_sum': cls.aggregated_halstead.get('E', 0.0) if cls.aggregated_halstead else 0.0,
                 'halstead': cls.aggregated_halstead if cls.aggregated_halstead else {},
-                'methods': []
+                'methods': [],
+                'refactoring_tips': tips
             }
             
             for method_name, method in cls.methods.items():

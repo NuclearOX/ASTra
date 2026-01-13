@@ -60,16 +60,12 @@ Examples:
     output_dir.mkdir(exist_ok=True)
     
     # Determine output file path
-    # If user provided a path, use it; otherwise use just the filename in output directory
     output_path = Path(args.output)
     if output_path.is_absolute():
-        # If absolute path provided, use it as-is
         final_output_path = output_path
     elif output_path.parent != Path('.'):
-        # If relative path with directory provided, put it in output directory
         final_output_path = output_dir / output_path
     else:
-        # If just filename provided, put it in output directory
         final_output_path = output_dir / output_path.name
     
     # Ensure the output directory exists
@@ -105,7 +101,10 @@ Examples:
     
     # Analyze all Java files
     java_files = list(input_path.rglob('*.java'))
-    print(f"  Analyzing {len(java_files)} Java files...")
+    num_files = len(java_files)
+    
+    # FIX: Rimosso len() superfluo che causava crash
+    print(f"  Analyzing {num_files} Java files...")
     
     for java_file in java_files:
         metrics_visitor.analyze_file(str(java_file))
@@ -135,8 +134,10 @@ Examples:
     # Phase 4: Generate Report
     # ============================================================
     print(f"{C.BLUE}Phase 4: Generating HTML report...{C.END}")
-    report_generator = ReportGenerator()
-    report_generator.generate_html_report(classes, charts, str(final_output_path))
+    
+    # FIX: Chiamata statica diretta, rimosso report_generator = ReportGenerator() inutile
+    ReportGenerator.generate_html_report(classes, charts, str(final_output_path), num_files)
+    
     print(f"  {C.GREEN}Report saved to: {final_output_path}{C.END}")
     print()
     
@@ -164,4 +165,3 @@ Examples:
 
 if __name__ == '__main__':
     main()
-

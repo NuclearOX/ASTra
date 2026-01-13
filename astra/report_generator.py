@@ -1,11 +1,17 @@
 """
-Report Generator Module
+Report Generator Module (FINAL FULL VERSION)
 Generates a professional, self-contained HTML5 dashboard with progressive disclosure.
+Features:
+- Full CSS styling
+- All 3 Charts (Scatter, Radar, Distribution)
+- NOC support
+- Correct File Counting
+- Refactoring Advisor integration
 """
 
 from typing import Dict, List
 from datetime import datetime
-from astra.advisor import RefactoringAdvisor  
+from astra.advisor import RefactoringAdvisor
 
 
 class ReportGenerator:
@@ -15,13 +21,8 @@ class ReportGenerator:
     def render(data: Dict, output_path: str):
         """
         Generate a comprehensive HTML report from the data dictionary.
-        
-        Args:
-            data: Dictionary containing project_name, summary, charts, and classes
-            output_path: Path where to save the HTML report
         """
         html_content = ReportGenerator._generate_html(data)
-        
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
     
@@ -140,7 +141,7 @@ class ReportGenerator:
         /* Charts Grid */
         .charts-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 30px;
             margin: 30px 0;
         }}
@@ -250,7 +251,7 @@ class ReportGenerator:
         
         .class-summary-row {{
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
             gap: 15px;
             align-items: center;
             width: 100%;
@@ -349,43 +350,6 @@ class ReportGenerator:
             margin-bottom: 15px;
             font-size: 1.1em;
             font-weight: 600;
-        }}
-        
-        .halstead-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }}
-        
-        .halstead-card {{
-            background: white;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }}
-        
-        .halstead-card .label {{
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }}
-        
-        .halstead-card .value {{
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #333;
-            font-family: 'Courier New', monospace;
-        }}
-        
-        .halstead-card .description {{
-            font-size: 0.75em;
-            color: #999;
-            margin-top: 5px;
-            font-style: italic;
         }}
         
         .halstead-table {{
@@ -493,25 +457,33 @@ class ReportGenerator:
         
         scatter_b64 = charts.get('scatter_b64', '')
         radar_b64 = charts.get('radar_b64', '')
+        # --- QUI AGGIUNGIAMO L'ISTOGRAMMA ---
+        dist_b64 = charts.get('mi_distribution', '')
         
-        charts_html = ""
-        if scatter_b64 or radar_b64:
-            charts_html = '<div class="charts-grid">'
-            if scatter_b64:
-                charts_html += f'''
-                <div class="chart-container">
-                    <h3 style="margin-bottom: 15px; color: #667eea;">Complexity Scatter Plot</h3>
-                    <img src="data:image/png;base64,{scatter_b64}" alt="Complexity Scatter Plot">
-                </div>
-                '''
-            if radar_b64:
-                charts_html += f'''
-                <div class="chart-container">
-                    <h3 style="margin-bottom: 15px; color: #667eea;">CK Metrics Radar Chart</h3>
-                    <img src="data:image/png;base64,{radar_b64}" alt="CK Metrics Radar Chart">
-                </div>
-                '''
-            charts_html += '</div>'
+        charts_html = '<div class="charts-grid">'
+        if scatter_b64:
+            charts_html += f'''
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #667eea;">Complexity Scatter Plot</h3>
+                <img src="data:image/png;base64,{scatter_b64}" alt="Complexity Scatter Plot">
+            </div>
+            '''
+        if radar_b64:
+            charts_html += f'''
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #667eea;">CK Metrics Radar Chart</h3>
+                <img src="data:image/png;base64,{radar_b64}" alt="CK Metrics Radar Chart">
+            </div>
+            '''
+        # --- NUOVO GRAFICO ---
+        if dist_b64:
+            charts_html += f'''
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #667eea;">MI Distribution</h3>
+                <img src="data:image/png;base64,{dist_b64}" alt="Maintainability Distribution">
+            </div>
+            '''
+        charts_html += '</div>'
         
         return f"""
             <div class="section">
@@ -542,7 +514,6 @@ class ReportGenerator:
     def _generate_hall_of_shame(classes: List[Dict]) -> str:
         """Generate Section B: Hall of Shame - Top 5 Critical Classes"""
         
-        # Sort by lowest MI first, then by highest WMC
         critical_classes = sorted(
             classes,
             key=lambda c: (c.get('mi', 100), -c.get('wmc', 0))
@@ -557,6 +528,7 @@ class ReportGenerator:
             mi = cls.get('mi', 0.0)
             wmc = cls.get('wmc', 0)
             dit = cls.get('dit', 0)
+            noc = cls.get('noc', 0) # --- NOC AGGIUNTO ---
             cbo = cls.get('cbo', 0)
             effort = cls.get('halstead_effort_sum', 0.0)
             
@@ -568,6 +540,7 @@ class ReportGenerator:
                 <td class="metric-value">{mi_badge}</td>
                 <td class="metric-value">{wmc}</td>
                 <td class="metric-value">{dit}</td>
+                <td class="metric-value">{noc}</td>
                 <td class="metric-value">{cbo}</td>
                 <td class="metric-value">{effort:,.0f}</td>
             </tr>
@@ -584,6 +557,7 @@ class ReportGenerator:
                                 <th>MI</th>
                                 <th>WMC</th>
                                 <th>DIT</th>
+                                <th>NOC</th> <!-- HEADER AGGIUNTO -->
                                 <th>CBO</th>
                                 <th>Halstead Effort</th>
                             </tr>
@@ -607,6 +581,7 @@ class ReportGenerator:
             mi = cls.get('mi', 0.0)
             wmc = cls.get('wmc', 0)
             dit = cls.get('dit', 0)
+            noc = cls.get('noc', 0) # --- NOC AGGIUNTO ---
             cbo = cls.get('cbo', 0)
             methods = cls.get('methods', [])
             halstead = cls.get('halstead', {})
@@ -625,10 +600,8 @@ class ReportGenerator:
                 </div>
                 """
             
-            # Generate Halstead metrics section
             halstead_html = ReportGenerator._generate_halstead_section(halstead)
             
-            # Generate methods table with full Halstead metrics
             methods_html = ""
             if methods:
                 methods_rows = ""
@@ -637,7 +610,6 @@ class ReportGenerator:
                     complexity = method.get('complexity', 0)
                     method_halstead = method.get('halstead', {})
                     
-                    # Extract Halstead metrics for method
                     method_effort = method_halstead.get('E', 0.0)
                     method_volume = method_halstead.get('V', 0.0)
                     method_difficulty = method_halstead.get('D', 0.0)
@@ -693,6 +665,7 @@ class ReportGenerator:
                             <span>{mi_badge}</span>
                             <span class="metric-value">WMC: {wmc}</span>
                             <span class="metric-value">DIT: {dit}</span>
+                            <span class="metric-value">NOC: {noc}</span> <!-- NOC added -->
                             <span class="metric-value">CBO: {cbo}</span>
                         </div>
                     </summary>
@@ -720,180 +693,74 @@ class ReportGenerator:
     @staticmethod
     def _generate_halstead_section(halstead: Dict) -> str:
         """Generate a comprehensive Halstead metrics section"""
-        
         if not halstead:
-            return """
-            <div class="class-details">
-                <div class="halstead-section">
-                    <h4>📊 Halstead Complexity Metrics</h4>
-                    <p style="color: #999; font-style: italic;">No Halstead metrics available</p>
-                </div>
-            </div>
-            """
+            return """<div class="class-details"><p>No Halstead metrics available</p></div>"""
         
-        # Extract all 12 Halstead metrics
-        n1 = halstead.get('n1', 0)
-        n2 = halstead.get('n2', 0)
-        N1 = halstead.get('N1', 0)
-        N2 = halstead.get('N2', 0)
-        N = halstead.get('N', 0)
-        n = halstead.get('n', 0)
-        V = halstead.get('V', 0.0)
-        D = halstead.get('D', 0.0)
-        E = halstead.get('E', 0.0)
-        T = halstead.get('T', 0.0)
-        L = halstead.get('L', 0.0)
-        B = halstead.get('B', 0.0)
+        # --- TABELLA COMPLETA ---
+        n1 = halstead.get('n1', 0); n2 = halstead.get('n2', 0)
+        N1 = halstead.get('N1', 0); N2 = halstead.get('N2', 0)
+        N = halstead.get('N', 0); n = halstead.get('n', 0)
+        V = halstead.get('V', 0.0); D = halstead.get('D', 0.0)
+        E = halstead.get('E', 0.0); T = halstead.get('T', 0.0)
+        L = halstead.get('L', 0.0); B = halstead.get('B', 0.0)
         
-        # Create table with all metrics
-        metrics_table = f"""
+        return f"""
         <div class="class-details">
             <div class="halstead-section">
                 <h4>📊 Halstead Complexity Metrics</h4>
                 <table class="halstead-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Symbol</th>
-                            <th>Value</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Metric</th><th>Symbol</th><th>Value</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr>
-                            <td class="metric-name">Unique Operators</td>
-                            <td><strong>n₁</strong></td>
-                            <td class="metric-value">{n1}</td>
-                            <td>Number of distinct operators</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Unique Operands</td>
-                            <td><strong>n₂</strong></td>
-                            <td class="metric-value">{n2}</td>
-                            <td>Number of distinct operands</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Total Operators</td>
-                            <td><strong>N₁</strong></td>
-                            <td class="metric-value">{N1}</td>
-                            <td>Total occurrences of operators</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Total Operands</td>
-                            <td><strong>N₂</strong></td>
-                            <td class="metric-value">{N2}</td>
-                            <td>Total occurrences of operands</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Program Length</td>
-                            <td><strong>N</strong></td>
-                            <td class="metric-value">{N}</td>
-                            <td>Total program length (N₁ + N₂)</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Vocabulary</td>
-                            <td><strong>n</strong></td>
-                            <td class="metric-value">{n}</td>
-                            <td>Program vocabulary (n₁ + n₂)</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Volume</td>
-                            <td><strong>V</strong></td>
-                            <td class="metric-value">{V:,.2f}</td>
-                            <td>Program size in bits (N × log₂(n))</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Difficulty</td>
-                            <td><strong>D</strong></td>
-                            <td class="metric-value">{D:.2f}</td>
-                            <td>Implementation difficulty ((n₁/2) × (N₂/n₂))</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Effort</td>
-                            <td><strong>E</strong></td>
-                            <td class="metric-value">{E:,.2f}</td>
-                            <td>Mental effort required (D × V)</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Time</td>
-                            <td><strong>T</strong></td>
-                            <td class="metric-value">{T:.2f} s</td>
-                            <td>Estimated coding time (E / 18)</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Program Level</td>
-                            <td><strong>L</strong></td>
-                            <td class="metric-value">{L:.4f}</td>
-                            <td>Program abstraction level (1 / D)</td>
-                        </tr>
-                        <tr>
-                            <td class="metric-name">Estimated Bugs</td>
-                            <td><strong>B</strong></td>
-                            <td class="metric-value">{B:.2f}</td>
-                            <td>Potential defects (V / 3000)</td>
-                        </tr>
+                        <tr><td>Unique Operators</td><td>n₁</td><td>{n1}</td><td>Distinct operators</td></tr>
+                        <tr><td>Unique Operands</td><td>n₂</td><td>{n2}</td><td>Distinct operands</td></tr>
+                        <tr><td>Total Operators</td><td>N₁</td><td>{N1}</td><td>Operator occurrences</td></tr>
+                        <tr><td>Total Operands</td><td>N₂</td><td>{N2}</td><td>Operand occurrences</td></tr>
+                        <tr><td>Length</td><td>N</td><td>{N}</td><td>N₁ + N₂</td></tr>
+                        <tr><td>Vocabulary</td><td>n</td><td>{n}</td><td>n₁ + n₂</td></tr>
+                        <tr><td>Volume</td><td>V</td><td>{V:,.2f}</td><td>Size in bits</td></tr>
+                        <tr><td>Difficulty</td><td>D</td><td>{D:.2f}</td><td>Complexity</td></tr>
+                        <tr><td>Effort</td><td>E</td><td>{E:,.2f}</td><td>Mental effort</td></tr>
+                        <tr><td>Time</td><td>T</td><td>{T:.2f} s</td><td>Coding time</td></tr>
+                        <tr><td>Level</td><td>L</td><td>{L:.4f}</td><td>Abstraction</td></tr>
+                        <tr><td>Bugs</td><td>B</td><td>{B:.2f}</td><td>Est. defects</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
         """
-        
-        return metrics_table
     
     @staticmethod
     def _get_mi_badge(mi: float) -> str:
-        """
-        Get HTML badge for Maintainability Index with color coding.
-        
-        Args:
-            mi: Maintainability Index value
-            
-        Returns:
-            HTML string with colored badge
-        """
-        if mi >= 85:
-            color_class = "badge-green"
-        elif mi >= 65:
-            color_class = "badge-yellow"
-        else:
-            color_class = "badge-red"
-        
+        if mi >= 85: color_class = "badge-green"
+        elif mi >= 65: color_class = "badge-yellow"
+        else: color_class = "badge-red"
         return f'<span class="badge {color_class}">{mi:.1f}</span>'
     
-    # Legacy method for backward compatibility
     @staticmethod
-    def generate_html_report(classes, charts: Dict[str, str], output_path: str):
-        """
-        Legacy method for backward compatibility.
-        Converts ClassMetrics objects to the new data format and calls render().
-        """
-        from astra.metrics_visitor import ClassMetrics, MethodMetrics
+    def generate_html_report(classes, charts: Dict[str, str], output_path: str, num_files: int):
+        """Main entry point. Now accepts num_files explicitly."""
         
-        # Convert to new format
         data = {
             'project_name': 'Java Project',
             'summary': {
-                'total_files': len(classes),
+                'total_files': num_files,
                 'total_loc': sum(c.loc for c in classes),
                 'avg_mi': sum(c.maintainability_index for c in classes) / len(classes) if classes else 0.0,
                 'god_classes_count': sum(1 for c in classes if c.maintainability_index < 65 or c.wmc > 20)
             },
             'charts': {
                 'scatter_b64': charts.get('complexity_scatter', ''),
-                'radar_b64': charts.get('ck_radar', '')
+                'radar_b64': charts.get('ck_radar', ''),
+                'mi_distribution': charts.get('mi_distribution', '') # --- PASSATO ISTOGRAMMA ---
             },
             'classes': []
         }
         
         for cls in classes:
             tips = RefactoringAdvisor.get_class_advice(cls)
-
             class_data = {
-                'name': cls.class_name,
-                'mi': cls.maintainability_index,
-                'wmc': cls.wmc,
-                'dit': cls.dit,
-                'cbo': cls.cbo,
+                'name': cls.class_name, 'mi': cls.maintainability_index,
+                'wmc': cls.wmc, 'dit': cls.dit, 'noc': cls.noc, 'cbo': cls.cbo, # --- PASSATO NOC ---
                 'halstead_effort_sum': cls.aggregated_halstead.get('E', 0.0) if cls.aggregated_halstead else 0.0,
                 'halstead': cls.aggregated_halstead if cls.aggregated_halstead else {},
                 'methods': [],
@@ -902,9 +769,7 @@ class ReportGenerator:
             
             for method_name, method in cls.methods.items():
                 method_data = {
-                    'name': method_name,
-                    'complexity': method.cyclomatic_complexity,
-                    'effort': method.halstead.get('E', 0.0) if method.halstead else 0.0,
+                    'name': method_name, 'complexity': method.cyclomatic_complexity,
                     'halstead': method.halstead if method.halstead else {}
                 }
                 class_data['methods'].append(method_data)

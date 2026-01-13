@@ -6,21 +6,21 @@
 
 **ASTra** (Java Automated Static Analysis) is a comprehensive static analysis tool that analyzes Java source code by generating and traversing Abstract Syntax Trees (ASTs) using ANTLR4. The tool calculates rigorous software metrics and generates professional HTML5 dashboards with visualizations.
 
-## 🚀 Features
+## Features
 
-- ✅ **ANTLR4-Based Parsing**: Uses official Java 20 grammar for accurate AST generation
-- ✅ **Two-Pass Analysis**: Separate inheritance graph building and metrics calculation
-- ✅ **Complete Metrics Suite**: 
+- **ANTLR4-Based Parsing**: Uses official Java 20 grammar for accurate AST generation
+- **Two-Pass Analysis**: Separate inheritance graph building and metrics calculation
+- **Complete Metrics Suite**: 
   - **Halstead Metrics**: All 12 metrics (n₁, n₂, N₁, N₂, N, n, V, D, E, T, L, B)
   - **Cyclomatic Complexity**: Independent paths through code
   - **Maintainability Index**: Code maintainability score (0-100)
   - **CK Metrics**: WMC, DIT, NOC, CBO (Object-Oriented Design metrics)
-- ✅ **Visual Dashboards**: HTML5 reports with embedded Base64 charts
-- ✅ **Progressive Disclosure**: Accordion-style interface for detailed exploration
-- ✅ **Self-Contained Reports**: No external dependencies, works offline
-- ✅ **Modular Architecture**: Clean separation of concerns, easy to extend
+- **Visual Dashboards**: HTML5 reports with embedded Base64 charts
+- **Progressive Disclosure**: Accordion-style interface for detailed exploration
+- **Self-Contained Reports**: No external dependencies, works offline
+- **Modular Architecture**: Clean separation of concerns, easy to extend
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
@@ -33,7 +33,7 @@
 - [Contributing](#contributing)
 - [License](#license)
 
-## 🔧 Installation
+## Installation
 
 ### Prerequisites
 
@@ -77,7 +77,7 @@ python main.py examples --output test.html
 
 If successful, you should see analysis progress and a report generated in `output/test.html`.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Analyze a Java project directory
@@ -92,7 +92,7 @@ python main.py /path/to/java/project
 
 All reports are automatically saved in the `output/` directory.
 
-## 📖 Usage
+## Usage
 
 ### Basic Command
 
@@ -128,7 +128,7 @@ The tool generates:
    - Hall of Shame (top 5 critical classes)
    - Detailed class analysis with accordion interface
 
-## 📊 Metrics Explained
+## Metrics Explained
 
 ### Halstead Complexity Metrics
 
@@ -177,7 +177,7 @@ Formula: `MI = 171 - 5.2×ln(V) - 0.23×CC - 16.2×ln(LOC)`
 - **NOC (Number of Children)**: Count of direct subclasses
 - **CBO (Coupling Between Objects)**: Count of unique external types referenced
 
-## 📄 Report Structure
+## Report Structure
 
 The generated HTML report contains three main sections:
 
@@ -196,7 +196,7 @@ The generated HTML report contains three main sections:
   - Complete Halstead metrics table (all 12 metrics with descriptions)
   - Methods table with complexity and Halstead metrics
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 PLP_Project/
@@ -218,14 +218,13 @@ PLP_Project/
 │   └── [Generated Python files]
 │
 ├── examples/                    # Example Java files
-│   ├── ComprehensiveExample.java
-│   └── ComplexInheritance.java
+│   └── *.java
 │
 └── output/                     # Generated reports
     └── *.html
 ```
 
-## 💡 Examples
+## Examples
 
 The `examples/` directory contains comprehensive test cases:
 
@@ -238,7 +237,7 @@ Run analysis on examples:
 python main.py examples
 ```
 
-## 🔬 Technical Details
+## Technical Details
 
 ### Two-Pass Analysis
 
@@ -261,15 +260,15 @@ python main.py examples
 - **Error Handling**: Graceful handling of syntax errors
 - **Extensibility**: Easy to add new metrics or visualizations
 
-## 🤝 Contributing
+## Contributing
 
 This is an academic project. For improvements or bug reports, please create an issue or submit a pull request.
 
-## 📝 License
+## License
 
 This project is developed for academic/educational purposes.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **ANTLR4**: Parser generator framework
 - **Java Language Specification**: Official Java grammar
@@ -278,5 +277,4 @@ This project is developed for academic/educational purposes.
 ---
 
 **Version**: 1.0.0  
-**Last Updated**: 2025
-
+**Last Updated**: 2026

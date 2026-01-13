@@ -6,8 +6,13 @@ grammar/*
 
 !grammar/Java20Lexer.g4
 !grammar/Java20Parser.g4
+!grammar/__init__.py
 
 output/
 *.html
 
 PROJECT_REPORT.md
+COMMANDS_SHEET.md
+commands.txt
+
+others/

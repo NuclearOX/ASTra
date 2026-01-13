@@ -114,6 +114,22 @@ class InheritanceGraphBuilder:
             # Silently continue - file might have syntax errors
             print(f"Warning: Could not parse {file_path}: {e}")
     
+    def build_graph_from_tree(self, tree, file_path: str):
+        """
+        Extracts inheritance info from a pre-built Parse Tree.
+        Does NOT perform parsing.
+        """
+        try:
+            # La logica di visita rimane la stessa, ma opera su un albero già esistente
+            if hasattr(tree, 'ordinaryCompilationUnit'):
+                unit = tree.ordinaryCompilationUnit()
+                if unit and hasattr(unit, 'topLevelClassOrInterfaceDeclaration'):
+                    for decl in unit.topLevelClassOrInterfaceDeclaration():
+                        if hasattr(decl, 'classDeclaration'):
+                            self.visit_class_declaration(decl.classDeclaration(), file_path)
+        except Exception as e:
+            print(f"Warning: Could not extract graph info from {file_path}: {e}")
+    
     def build_graph_from_directory(self, directory: str):
         """Scan directory recursively for all Java files and build inheritance graph"""
         for root, dirs, files in os.walk(directory):

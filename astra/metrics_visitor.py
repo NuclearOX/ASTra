@@ -297,6 +297,29 @@ class MetricsVisitor(Java20ParserVisitor):
     def _is_primitive_or_builtin(self, type_name):
         return type_name in {'int','long','short','byte','char','float','double','boolean','void','String','Object','List','ArrayList','Map','HashMap','Set','HashSet','Date','File','Scanner','System','Math'}
 
+    def analyze_tree(self, tree, file_path: str):
+        """
+        Analyzes a pre-built Parse Tree.
+        Does NOT perform parsing.
+        """
+        self.current_file_path = file_path
+        try:
+            if tree is None:
+                print(f"Warning: Cannot analyze {file_path} - tree is None")
+                return
+            
+            self.visit(tree)
+            self._calculate_loc(file_path)
+            
+            # Finalizza le metriche solo per le classi trovate in questo albero
+            for class_metrics in self.classes.values():
+                if class_metrics.file_path == file_path:
+                    class_metrics.calculate_class_metrics(self.inheritance_graph)
+        except Exception as e:
+            import traceback
+            print(f"Error analyzing tree for {file_path}: {e}")
+            traceback.print_exc()
+
     def analyze_file(self, file_path: str):
         self.current_file_path = file_path
         try:

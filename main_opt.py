@@ -1,0 +1,162 @@
+"""
+ASTra - Java Static Analysis Tool (OPTIMIZED FINAL VERSION)
+Implements a true "Single-Parse + Post-Processing" architecture.
+"""
+
+import sys
+import argparse
+from pathlib import Path
+from antlr4 import FileStream, CommonTokenStream
+
+# Importa i moduli generati e custom
+from grammar.Java20Lexer import Java20Lexer
+from grammar.Java20Parser import Java20Parser
+from astra.graph_builder import InheritanceGraphBuilder
+from astra.metrics_visitor import MetricsVisitor
+from astra.chart_generator import ChartGenerator
+from astra.report_generator import ReportGenerator
+from astra.constants import C, DEFAULT_OUTPUT_DIR
+
+def main():
+    """Main entry point for ASTra"""
+    parser = argparse.ArgumentParser(
+        description='ASTra - Java Static Analysis Tool',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=
+        """
+        Examples:
+        python main.py examples/
+        python main.py /path/to/java/project --output report.html
+        """
+    )
+    
+    parser.add_argument(
+        'input_dir',
+        type=str,
+        help='Directory containing Java source files to analyze'
+    )
+    
+    parser.add_argument(
+        '--output',
+        type=str,
+        default='astra_report.html',
+        help='Output HTML report filename (default: astra_report.html). Reports are saved in the output/ directory.'
+    )
+    
+    args = parser.parse_args()
+    
+    # Validate input directory
+    input_path = Path(args.input_dir)
+    if not input_path.exists():
+        print(f"Error: Input directory '{args.input_dir}' does not exist.")
+        sys.exit(1)
+    
+    if not input_path.is_dir():
+        print(f"Error: '{args.input_dir}' is not a directory.")
+        sys.exit(1)
+    
+    # Ensure output directory exists
+    output_dir = Path(DEFAULT_OUTPUT_DIR)
+    output_dir.mkdir(exist_ok=True)
+    
+    # Determine output file path
+    output_path = Path(args.output)
+    if output_path.is_absolute():
+        final_output_path = output_path
+    elif output_path.parent != Path('.'):
+        final_output_path = output_dir / output_path
+    else:
+        final_output_path = output_dir / output_path.name
+    
+    # Ensure the output directory exists
+    final_output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    print(f"{C.HEADER}{'=' * 60}{C.END}")
+    print(f"{C.HEADER}ASTra - Java Static Analysis Tool{C.END}")
+    print(f"{C.HEADER}{'=' * 60}{C.END}")
+    print(f"{C.BLUE}Input directory: {input_path.absolute()}{C.END}")
+    print(f"{C.BLUE}Output report: {final_output_path}{C.END}")
+    print()
+    
+    # ============================================================
+    # FASE 1: Parsing e Raccolta Dati (Single Pass Reale)
+    # ============================================================
+    print(f"\n{C.BLUE}Phase 1: Parsing all files and collecting data (Single Pass)...{C.END}")
+    
+    graph_builder = InheritanceGraphBuilder()
+    # Il visitor ha bisogno di una referenza al grafo, che si popolerà man mano
+    metrics_visitor = MetricsVisitor(graph_builder.get_graph(), {})
+    
+    java_files = list(input_path.rglob('*.java'))
+    num_files = len(java_files)
+    print(f"  Found {num_files} Java files to analyze...")
+
+    # --- CICLO UNICO SUI FILE ---
+    for java_file in java_files:
+        try:
+            # 1. Parsing centralizzato: avviene UNA SOLA VOLTA qui.
+            input_stream = FileStream(str(java_file), encoding='utf-8')
+            lexer = Java20Lexer(input_stream)
+            stream = CommonTokenStream(lexer)
+            parser = Java20Parser(stream)
+            tree = parser.compilationUnit()
+            
+            # 2. Passiamo l'albero già fatto ai due moduli
+            graph_builder.build_graph_from_tree(tree, str(java_file))
+            metrics_visitor.analyze_tree(tree, str(java_file))
+            
+        except Exception as e:
+            print(f"{C.FAIL}  Error processing {java_file}: {e}{C.END}")
+
+    print(f"  {C.GREEN}Parsing and local metric calculation complete.{C.END}")
+    print()
+
+    # ============================================================
+    # FASE 2: Post-Processing e Finalizzazione Metriche
+    # ============================================================
+    print(f"{C.BLUE}Phase 2: Finalizing global metrics (DIT, NOC)...{C.END}")
+    
+    classes = list(metrics_visitor.get_results().values())
+    
+    # Calcoliamo DIT e NOC usando il grafo completo
+    for class_metrics in classes:
+        class_metrics.dit = graph_builder.calculate_dit(class_metrics.class_name)
+        class_metrics.noc = graph_builder.calculate_noc(class_metrics.class_name)
+    
+    print(f"  {C.GREEN}Analyzed {len(classes)} classes with {sum(len(c.methods) for c in classes)} methods.{C.END}")
+    print()
+
+    # ============================================================
+    # Fasi 3 & 4 
+    # ============================================================
+    print(f"{C.BLUE}Phase 3: Generating visualizations...{C.END}")
+    charts = ChartGenerator.generate_all_charts(classes)
+    
+    print(f"{C.BLUE}Phase 4: Generating HTML report...{C.END}")
+    ReportGenerator.generate_html_report(classes, charts, str(final_output_path), num_files)
+    
+    print(f"\n{C.GREEN}Success! Report saved to: {final_output_path}{C.END}")
+    
+    # ============================================================
+    # Summary
+    # ============================================================
+    print(f"{C.HEADER}{'=' * 60}{C.END}")
+    print(f"{C.HEADER}Analysis Complete!{C.END}")
+    print(f"{C.HEADER}{'=' * 60}{C.END}")
+    print(f"{C.BLUE}Total Classes: {len(classes)}{C.END}")
+    print(f"{C.BLUE}Total Methods: {sum(len(c.methods) for c in classes)}{C.END}")
+    
+    if classes:
+        avg_mi = sum(c.maintainability_index for c in classes) / len(classes)
+        green = sum(1 for c in classes if c.maintainability_index > 85)
+        yellow = sum(1 for c in classes if 65 <= c.maintainability_index <= 85)
+        red = sum(1 for c in classes if c.maintainability_index < 65)
+        
+        print(f"{C.BLUE}Average MI: {avg_mi:.2f}{C.END}")
+        print(f"{C.BLUE}Maintainability: {C.GREEN}Green={green}{C.END}, {C.WARN}Yellow={yellow}{C.END}, {C.FAIL}Red={red}{C.END}")
+    
+    print(f"\n{C.GREEN}Open '{final_output_path}' in your browser to view the full report.{C.END}")
+    print(f"{C.HEADER}{'=' * 60}{C.END}")
+
+if __name__ == '__main__':
+    main()

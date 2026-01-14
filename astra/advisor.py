@@ -39,19 +39,19 @@ class RefactoringAdvisor:
 
         # 1. Check Maintainability Index
         if cls.maintainability_index < RefactoringAdvisor.THRESHOLDS['MI_CRITICAL']:
-            tips.append("⚠️ **Critical Maintainability**: This class is very hard to maintain. Consider a complete rewrite or splitting it into smaller components.")
+            tips.append("**Critical Maintainability**: This class is very hard to maintain. Consider a complete rewrite or splitting it into smaller components.")
         
         # 2. Check God Class (High WMC + High LOC)
         if cls.wmc > RefactoringAdvisor.THRESHOLDS['WMC_HIGH'] or cls.loc > RefactoringAdvisor.THRESHOLDS['CLASS_LOC_HIGH']:
-            tips.append("🏗️ **God Class Detected**: This class does too much (High WMC/LOC). Apply **Extract Class** to separate responsibilities (Single Responsibility Principle).")
+            tips.append("**God Class Detected**: This class does too much (High WMC/LOC). Apply **Extract Class** to separate responsibilities (Single Responsibility Principle).")
 
         # 3. Check High Coupling (CBO)
         if cls.cbo > RefactoringAdvisor.THRESHOLDS['CBO_HIGH']:
-            tips.append("🔗 **High Coupling**: Depends on many external types. Consider using **Dependency Injection**, **Facade Pattern**, or **Mediator** to decouple.")
+            tips.append("**High Coupling**: Depends on many external types. Consider using **Dependency Injection**, **Facade Pattern**, or **Mediator** to decouple.")
 
         # 4. Check Deep Inheritance (DIT)
         if cls.dit > RefactoringAdvisor.THRESHOLDS['DIT_HIGH']:
-            tips.append("🌳 **Deep Inheritance**: Inheritance tree is too deep. Prefer **Composition over Inheritance** to reduce fragility.")
+            tips.append("**Deep Inheritance**: Inheritance tree is too deep. Prefer **Composition over Inheritance** to reduce fragility.")
 
         return tips
 
@@ -66,18 +66,18 @@ class RefactoringAdvisor:
         # 1. Cyclomatic Complexity
         cc = method.cyclomatic_complexity
         if cc > RefactoringAdvisor.THRESHOLDS['CC_HIGH']:
-            tips.append(f"🔀 **Very High Complexity ({cc})**: Too many branches. Refactor using **Strategy Pattern** or **Polymorphism** to replace switch/if chains.")
+            tips.append(f"**Very High Complexity ({cc})**: Too many branches. Refactor using **Strategy Pattern** or **Polymorphism** to replace switch/if chains.")
         elif cc > RefactoringAdvisor.THRESHOLDS['CC_MODERATE']:
-            tips.append(f"✂️ **High Complexity ({cc})**: Hard to test. Apply **Extract Method** to decompose complex logic.")
+            tips.append(f"**High Complexity ({cc})**: Hard to test. Apply **Extract Method** to decompose complex logic.")
 
         # 2. Method Size (LOC)
         if method.loc > RefactoringAdvisor.THRESHOLDS['METHOD_LOC_HIGH']:
-            tips.append(f"📜 **Long Method ({method.loc} lines)**: Hard to read. Group related lines and apply **Extract Method**.")
+            tips.append(f"**Long Method ({method.loc} lines)**: Hard to read. Group related lines and apply **Extract Method**.")
 
         # 3. Halstead Effort (Cognitive Load)
         if method.halstead:
             effort = method.halstead.get('E', 0)
             if effort > 60000: # High threshold for "Brain Melter"
-                tips.append("🧠 **High Cognitive Load**: High Halstead Effort. Simplify logic or rename variables for clarity.")
+                tips.append("**High Cognitive Load**: High Halstead Effort. Simplify logic or rename variables for clarity.")
 
         return tips
